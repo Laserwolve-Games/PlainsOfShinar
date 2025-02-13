@@ -1,6 +1,7 @@
 // Intellisense doesn't work unless we use node.js/npm.
 // This doesn't work: /// <reference path='./pixi.js' />
 // Neither does a jsconfig.json file, or a global.d.ts file.
+// We've asked for help in  this issue: https://github.com/pixijs/pixijs/discussions/11280
 // Unfortunately the only solution we have found is toggling this line:
 import * as PIXI from './pixi.js';
 

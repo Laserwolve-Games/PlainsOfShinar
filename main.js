@@ -1,3 +1,9 @@
+// Intellisense doesn't work unless we use node.js/npm.
+// This doesn't work: /// <reference path='./pixi.js' />
+// Neither does a jsconfig.json file, or a global.d.ts file.
+// Unfortunately the only solution we have found is toggling this line:
+import * as PIXI from './pixi.js';
+
 import Player from './player.js';
 
 (async () => {
@@ -25,7 +31,7 @@ import Player from './player.js';
         const rect = app.view.getBoundingClientRect();
         const targetX = (event.clientX - rect.left) / app.stage.scale.x;
         const targetY = (event.clientY - rect.top) / app.stage.scale.y;
-        player.moveTo(targetX / 2, targetY / 2);
+        player.moveTo(targetX, targetY);
     });
 
     app.ticker.add(() => {

@@ -1,10 +1,21 @@
-export default class Player {
+export default class Player extends PIXI.Sprite {
     constructor(animation) {
+        super(PIXI.Texture.WHITE);
+        this.width = 25;
+        this.height = 25;
+        this.anchor.set(.5);
+        this.position.set(150, 300);
+        this.targetX = 150;
+        this.targetY = 300;
+        this.speed = 5;
+
         this.body = PIXI.AnimatedSprite.fromFrames(animation);
-        const baseTexture = PIXI.Texture.WHITE;
-        baseTexture.tint = 0xFF0000;
-        this.base = new PIXI.Sprite(baseTexture);
-        this.base.width = 50; // Set width
-        this.base.height = 50; // Set height
+        this.body.animationSpeed = .5;
+        this.body.updateAnchor = true;
+        this.body.play();
+    }
+    moveTo(x, y) {
+        this.targetX = x;
+        this.targetY = y;
     }
 }

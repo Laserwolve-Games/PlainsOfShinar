@@ -59,7 +59,6 @@ let entities = [];
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 entity.actualSpeed = isometrify(entity.speed, entity.actualFacing);
-                console.log(entity.actualSpeed);
 
                 if (distance > entity.actualSpeed) {
 

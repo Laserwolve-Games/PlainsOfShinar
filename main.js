@@ -70,6 +70,8 @@ class Entity extends PIXI.Sprite {
 
     constructor(spritesheet, initialAnimation, width, height, x, y, angle) {
 
+        spritesheet = ('spritesheets/' + spritesheet + '.json');
+
         super(PIXI.Texture.WHITE);
         this.width = width;
         this.height = height;
@@ -112,7 +114,7 @@ class Player extends Entity {
 
     constructor() {
 
-        super('spritesheets/man.json', 'walk', 50, 25, 150, 300, 0);
+        super('man', 'walk', 50, 25, 150, 300, 0);
 
         this.speed = 5;
     }

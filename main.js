@@ -16,8 +16,6 @@ let entities = [];
 
     await loadAsset("background.webp");
 
-    console.log(PIXI.Assets.cache);
-
     // const animations = PIXI.Assets.cache.get('spritesheets/man.json').data.animations;
 
     const background = PIXI.Sprite.from("background.webp");
@@ -38,13 +36,14 @@ let entities = [];
     // stuff that runs every tick
     app.ticker.add(() => {
 
+        // TODO: Think about setting the entity to the width of its body,
+        // and maybe making it an oval and adjusting its angle.
         // player.body.position.set(player.position.x, player.position.y);
 
         // every tick, for every entity
         entities.forEach(entity => {
 
-            // keep bodies on top of their entities
-            entity.body.position.set(entity.position.x, entity.position.y);
+
 
             // entity movement
             if (entity.targetPosition !== entity.position) {
@@ -55,49 +54,73 @@ let entities = [];
 
                 if (distance > entity.speed) {
 
+                    entity.isMoving = true;
+
                     entity.position.x += (dx / distance) * entity.speed;
                     entity.position.y += (dy / distance) * entity.speed;
+
                 } else {
+
+                    entity.isMoving = false;
 
                     entity.targetPosition = entity.position;
                 }
             }
+
+            // TODO: I don't think we need to do this every tick, but let's figure that out when we deal with holding click to move
+            if (entity.isMoving) {
+
+                entity.facing = calculateFacing(entity.position.x, entity.position.y, entity.targetPosition.x, entity.targetPosition.y);
+
+                const animation = "walk_" + entity.facing;
+
+                if (entity.body.animation != animation) {
+
+                    entity.setAnimation("walk_" + entity.facing);
+                }
+            } else {
+
+                const animation = "idle_" + entity.facing;
+
+                if (entity.body.animation != animation) {
+
+                    entity.setAnimation("idle_" + entity.facing);
+                }
+            }
+
+            // keep bodies on top of their entities
+            entity.body.position.set(entity.position.x, entity.position.y);
         });
     });
 })();
 
 class Entity extends PIXI.Sprite {
 
-    constructor(spritesheet, initialAnimation, width, height, x, y, angle) {
+    constructor(spritesheet, animation, width, height, x, y, facing) {
 
-        spritesheet = ('spritesheets/' + spritesheet + '.json');
+        spritesheet = 'spritesheets/' + spritesheet + '.json';
 
         super(PIXI.Texture.WHITE);
         this.width = width;
         this.height = height;
         this.position.set(x, y);
-        this.angle = angle;
+        this.facing = facing;
         this.targetPosition = this.position;
 
         this.speed = 0;
         this.anchor.set(.5);
 
-        this.init(spritesheet, initialAnimation + '_' + angle);
+        this.init(spritesheet, animation + '_' + this.facing);
     }
-    async init(spritesheet, initialAnimation) {
+    async init(spritesheet, animation) {
 
         await loadAsset(spritesheet);
 
         this.spritesheet = PIXI.Assets.cache.get(spritesheet).data.animations;
 
-        this.body = PIXI.AnimatedSprite.fromFrames(this.spritesheet[initialAnimation]);
-
-        this.body.animationSpeed = .5;
-        this.body.updateAnchor = true;
-        this.body.play();
+        this.setAnimation(animation);
 
         app.stage.addChild(this);
-        app.stage.addChild(this.body);
 
         entities.push(this);
     }
@@ -105,8 +128,20 @@ class Entity extends PIXI.Sprite {
 
         this.targetPosition = { x, y };
     }
-    changeAnimation(newAnimation) {
-        this.body = PIXI.AnimatedSprite.fromFrames(this.spritesheet[newAnimation]);
+    setAnimation(animation) {
+
+        if (this.body) {
+            app.stage.removeChild(this.body);
+            this.body.destroy();
+        }
+        this.body = PIXI.AnimatedSprite.fromFrames(this.spritesheet[animation]);
+        this.body.animation = animation;
+        this.body.animationSpeed = .5;
+        this.body.updateAnchor = true;
+        if (!this.body.playing) this.body.play();
+
+        // Add the new animated sprite to the stage
+        app.stage.addChild(this.body);
     }
 }
 
@@ -114,7 +149,7 @@ class Player extends Entity {
 
     constructor() {
 
-        super('man', 'walk', 50, 25, 150, 300, 0);
+        super('man', 'walk', 50, 25, 150, 300, 90);
 
         this.speed = 5;
     }
@@ -125,4 +160,19 @@ async function loadAsset(asset) {
 
         await PIXI.Assets.load(asset);
     }
+}
+function calculateFacing(x1, y1, x2, y2) {
+
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    const angleInRadians = Math.atan2(deltaY, deltaX);
+    const angleInDegrees = angleInRadians * (180 / Math.PI);
+    // TODO: Correct facings in the DazScript
+    let facing = Math.round(angleInDegrees / 22.5) * 22.5;
+
+    // Code to correct the facings if they weren't corrected in the DazScript
+    facing = Math.abs((facing + 270) % 360 - 360);
+    if (facing == 360) facing = 0;
+
+    return facing;
 }

@@ -10,15 +10,20 @@ let entities = [];
 
 (async () => {
     app = new PIXI.Application();
-    await app.init({ width: 960, height: 540 });
+    await app.init({ width: 1920, height: 1080, renderer: new PIXI.WebGPURenderer() });
 
     document.body.appendChild(app.canvas);
 
-    await loadAsset('background.webp');
+    await loadAsset('background.png');
 
     // const animations = PIXI.Assets.cache.get('spritesheets/man.json').data.animations;
 
-    const background = PIXI.Sprite.from('background.webp');
+    const backgroundTexture = PIXI.Texture.from('background.png');
+
+    const background = new PIXI.TilingSprite({texture: backgroundTexture, width: app.canvas.width, height: app.canvas.height });
+
+    background.tileScale.y = .33;
+    background.tileTransform.rotation = .66;
     app.stage.addChild(background);
 
     app.stage.scale.x = app.canvas.width / background.width;
@@ -168,8 +173,6 @@ class Entity extends PIXI.Sprite {
 
         let facing = Math.round(angleInDegrees / 22.5) * 22.5;
     
-
-
         // temp fix until we re-make the spritesheets
         if (facing == 180) facing = -180;
 

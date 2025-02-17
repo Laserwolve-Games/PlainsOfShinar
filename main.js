@@ -168,8 +168,10 @@ class Entity extends PIXI.Sprite {
 
         let facing = Math.round(angleInDegrees / 22.5) * 22.5;
     
-        facing = Math.abs((facing + 270) % 360 - 360);
-        if (facing == 360) facing = 0;
+
+
+        // temp fix until we re-make the spritesheets
+        if (facing == 180) facing = -180;
 
         this.facing = facing;
     }

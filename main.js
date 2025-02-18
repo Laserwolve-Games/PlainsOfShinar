@@ -84,25 +84,25 @@ let entities = [];
                 entity.calculateFacing(entity.position.x, entity.position.y, entity.targetPosition.x, entity.targetPosition.y);
 
                 // If the entity already was walking, play from the current frame, otherwise start from the beginning
-                if (entity.body.animation.includes('walk')) entity.setAnimation('walk_' + entity.facing, false);
-                else entity.setAnimation('walk_' + entity.facing, true);
+                if (entity.body.animation.includes('walk')) entity.setAnimation('walk', false);
+                else entity.setAnimation('walk', true);
 
-            } else entity.setAnimation('idle_' + entity.facing, true);
+            } else entity.setAnimation('idle', true);
 
             // keep bodies on top of their entities
             entity.body.position.set(entity.position.x, entity.position.y);
+            entity.body.shadow.position.set(entity.position.x, entity.position.y);
         });
     });
 })();
 class Entity extends PIXI.Sprite {
 
-    constructor(spritesheet, animation, size, x, y, facing) {
-
-        spritesheet = 'spritesheets/' + spritesheet + '.json';
+    constructor(name, animation, size, x, y, facing) {
 
         super(PIXI.Texture.WHITE);
 
         // this.visible = false;
+        this.label = name;
         this.width = size;
         this.height = this.width / 2;
         this.position.set(x, y);
@@ -112,13 +112,15 @@ class Entity extends PIXI.Sprite {
         this.speed = 0;
         this.anchor.set(.5);
 
-        this.init(spritesheet, animation + '_' + this.facing);
+        this.bodySpritesheet = 'spritesheets/' + this.label + '.json';
+        this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
+
+        this.init(animation);
     }
-    async init(spritesheet, animation) {
+    init = async (animation) => {
 
-        await loadAsset(spritesheet);
-
-        this.spritesheet = PIXI.Assets.cache.get(spritesheet).data.animations;
+        await loadAsset(this.bodySpritesheet);
+        await loadAsset(this.shadowSpritesheet);
 
         this.setAnimation(animation, true);
 
@@ -132,6 +134,9 @@ class Entity extends PIXI.Sprite {
     }
     setAnimation = (animation, playFromBeginning) => {
 
+        // Add the extra necessary animation information
+        animation = this.label + '_' + animation + '_' + this.facing;
+
         // Don't set the animation if the new one is the same as the current one
         if (this.body?.animation != animation) {
 
@@ -144,22 +149,39 @@ class Entity extends PIXI.Sprite {
 
                 if (!playFromBeginning) savedFrame = this.body.currentFrame;
 
+                // Get rid of the shadow, if there is one
+                if (this.body.shadow) {
+
+                    app.stage.removeChild(this.body.shadow);
+
+                    this.body.shadow.destroy();
+                }
                 app.stage.removeChild(this.body);
 
                 this.body.destroy();
             }
-            this.body = PIXI.AnimatedSprite.fromFrames(this.spritesheet[animation]);
+            this.body = PIXI.AnimatedSprite.fromFrames(PIXI.Assets.cache.get(this.bodySpritesheet).data.animations[animation]);
             this.body.animation = animation;
             this.body.animationSpeed = .5;
             this.body.updateAnchor = true;
 
+            this.body.shadow = PIXI.AnimatedSprite.fromFrames(PIXI.Assets.cache.get(this.shadowSpritesheet).data.animations['shadow_' + animation]);
+            console.log(this.body.shadow);
+            this.body.shadow.animation = 'shadow_' + this.body.animation;
+            this.body.shadow.animationSpeed = this.body.animationSpeed;
+            this.body.shadow.updateAnchor = this.body.updateAnchor;
+
             if (playFromBeginning) this.body.currentFrame = 0;
             else this.body.currentFrame = savedFrame;
 
+            this.body.shadow.currentFrame = this.body.currentFrame;
+
             this.body.play();
+            this.body.shadow.play();
 
             // Add the new animated sprite to the stage
             app.stage.addChild(this.body);
+            app.stage.addChild(this.body.shadow);
         }
     }
     calculateFacing = (x1, y1, x2, y2) => {
@@ -171,10 +193,10 @@ class Entity extends PIXI.Sprite {
 
         this.actualFacing = angleInDegrees;
 
-        let facing = Math.round(angleInDegrees / 22.5) * 22.5;
-    
-        // temp fix until we re-make the spritesheets
-        if (facing == 180) facing = -180;
+        // + 0 prevents negative 0
+        let facing = Math.round(angleInDegrees / 22.5) * 22.5 + 0;
+
+        if (facing == -180) facing = 180;
 
         this.facing = facing;
     }

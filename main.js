@@ -20,7 +20,7 @@ let entities = [];
 
     const backgroundTexture = PIXI.Texture.from('background.png');
 
-    const background = new PIXI.TilingSprite({texture: backgroundTexture, width: app.canvas.width, height: app.canvas.height });
+    const background = new PIXI.TilingSprite({ texture: backgroundTexture, width: app.canvas.width, height: app.canvas.height });
 
     background.tileScale.y = .33;
     background.tileTransform.rotation = .66;
@@ -83,15 +83,16 @@ let entities = [];
 
                 entity.calculateFacing(entity.position.x, entity.position.y, entity.targetPosition.x, entity.targetPosition.y);
 
-                // If the entity already was walking, play from the current frame, otherwise start from the beginning
-                if (entity.body.animation.includes('walk')) entity.setAnimation('walk', false);
-                else entity.setAnimation('walk', true);
+                // If the entity already was walking, play from the current frame...
+                if (entity.body.label.includes('walk')) entity.setAnimation('walk', false);
 
-            } else entity.setAnimation('idle', true);
+                // ...otherwise, start from the beginning
+                else entity.setAnimation('walk');
 
-            // keep bodies on top of their entities
-            entity.body.position.set(entity.position.x, entity.position.y);
-            entity.body.shadow.position.set(entity.position.x, entity.position.y);
+            // if the walk animation is playing but the entity isn't moving, set the animation to idle
+            } else if (entity.body.label.includes('walk')) entity.setAnimation('idle');
+
+            entity.sync();
         });
     });
 })();
@@ -102,6 +103,8 @@ class Entity extends PIXI.Sprite {
         super(PIXI.Texture.WHITE);
 
         // this.visible = false;
+        this.animations = [];
+        this.body = null; // stores the current animation
         this.label = name;
         this.width = size;
         this.height = this.width / 2;
@@ -111,78 +114,94 @@ class Entity extends PIXI.Sprite {
         this.targetPosition = this.position;
         this.speed = 0;
         this.anchor.set(.5);
-
+        this.animation = animation;
+        this.animationFullName = this.label + '_' + this.animation + '_' + this.facing;
         this.bodySpritesheet = 'spritesheets/' + this.label + '.json';
         this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
 
-        this.init(animation);
+        (async () => {
+            await loadAsset(this.bodySpritesheet);
+            await loadAsset(this.shadowSpritesheet);
+
+            const bodyAnimations = PIXI.Assets.cache.get(this.bodySpritesheet).data.animations;
+            const shadowAnimations = PIXI.Assets.cache.get(this.shadowSpritesheet).data.animations;
+
+            for (let i = 0; i < Object.keys(bodyAnimations).length; i++) {
+
+                const animation = PIXI.AnimatedSprite.fromFrames(bodyAnimations[Object.keys(bodyAnimations)[i]]);
+                const shadow = PIXI.AnimatedSprite.fromFrames(shadowAnimations[Object.keys(shadowAnimations)[i]]);
+
+                animation.label = Object.keys(bodyAnimations)[i];
+                animation.updateAnchor = true;
+                
+                shadow.label = Object.keys(shadowAnimations)[i];
+                shadow.updateAnchor = animation.updateAnchor;
+
+                animation.shadow = shadow;
+
+                this.animations.push(animation);
+            }
+
+            app.stage.addChild(this);
+
+            this.setAnimation(this.animation);
+
+            entities.push(this);
+        })();
     }
-    init = async (animation) => {
+    setAnimation = (animation = 'default', playFromBeginning = true) => {
 
-        await loadAsset(this.bodySpritesheet);
-        await loadAsset(this.shadowSpritesheet);
+        let startFrame = 0;
+        animation = this.label + '_' + animation + '_' + this.facing;
 
-        this.setAnimation(animation, true);
+        // If the current animation is the same as the new one...
+        if (this?.body?.label === animation) {
 
-        app.stage.addChild(this);
+            // Check if we should restart it or not...
+            if (playFromBeginning) this.body.currentFrame = startFrame;
 
-        entities.push(this);
+            // then exit
+            return;
+        }
+
+        // If a body exists, save its current frame, then remove it and its shadow from the stage
+        if (this.body) {
+
+            if(!playFromBeginning) startFrame = this.body.currentFrame;
+
+            this.body.stop();
+
+            app.stage.removeChild(this.body);
+            app.stage.removeChild(this.body.shadow);
+        }
+        // set body to the specified animation     
+        this.body = this.animations.find(a => a.label === animation);
+        
+        // add the body and its shadow to the stage and set all necessary properties
+        app.stage.addChild(this.body);
+        app.stage.addChild(this.body.shadow);
+
+        this.body.currentFrame = startFrame;
+        this.body.animationSpeed = .5;
+
+        this.body.play();
+        this.body.shadow.play();
     }
+    /**
+     * Keeps bodies, shadows, and (soon) gear in sync with their entities.
+     * @author Andrew Rogers
+     */
+    sync = () => {
+            
+            this.body.position.set(this.position.x, this.position.y);
+            this.body.shadow.position.set(this.body.position.x, this.body.position.y);
+
+            this.body.shadow.animationSpeed = this.body.animationSpeed;
+            this.body.shadow.currentFrame = this.body.currentFrame;
+        }
     moveTo = (x, y) => {
 
         this.targetPosition = { x, y };
-    }
-    setAnimation = (animation, playFromBeginning) => {
-
-        // Add the extra necessary animation information
-        animation = this.label + '_' + animation + '_' + this.facing;
-
-        // Don't set the animation if the new one is the same as the current one
-        if (this.body?.animation != animation) {
-
-            // Save the current frame of the current animation before destroying it,
-            // to use if playFromBeginning is false
-            let savedFrame;
-
-            // Get rid of the current wrong animation, if there is one
-            if (this.body) {
-
-                if (!playFromBeginning) savedFrame = this.body.currentFrame;
-
-                // Get rid of the shadow, if there is one
-                if (this.body.shadow) {
-
-                    app.stage.removeChild(this.body.shadow);
-
-                    this.body.shadow.destroy();
-                }
-                app.stage.removeChild(this.body);
-
-                this.body.destroy();
-            }
-            this.body = PIXI.AnimatedSprite.fromFrames(PIXI.Assets.cache.get(this.bodySpritesheet).data.animations[animation]);
-            this.body.animation = animation;
-            this.body.animationSpeed = .5;
-            this.body.updateAnchor = true;
-
-            this.body.shadow = PIXI.AnimatedSprite.fromFrames(PIXI.Assets.cache.get(this.shadowSpritesheet).data.animations['shadow_' + animation]);
-            console.log(this.body.shadow);
-            this.body.shadow.animation = 'shadow_' + this.body.animation;
-            this.body.shadow.animationSpeed = this.body.animationSpeed;
-            this.body.shadow.updateAnchor = this.body.updateAnchor;
-
-            if (playFromBeginning) this.body.currentFrame = 0;
-            else this.body.currentFrame = savedFrame;
-
-            this.body.shadow.currentFrame = this.body.currentFrame;
-
-            this.body.play();
-            this.body.shadow.play();
-
-            // Add the new animated sprite to the stage
-            app.stage.addChild(this.body);
-            app.stage.addChild(this.body.shadow);
-        }
     }
     calculateFacing = (x1, y1, x2, y2) => {
 
@@ -211,7 +230,7 @@ class Player extends Entity {
     }
 }
 const loadAsset = async (asset) => {
-    
+
     if (!PIXI.Assets.cache.has(asset)) await PIXI.Assets.load(asset);
 }
 const isometrify = (value, angle) => value * lerp(.5, 1, Math.abs(Math.abs(angle) - 90) / 90);

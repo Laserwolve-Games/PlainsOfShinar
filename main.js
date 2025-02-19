@@ -16,8 +16,6 @@ let entities = [];
 
     await loadAsset('background.png');
 
-    // const animations = PIXI.Assets.cache.get('spritesheets/man.json').data.animations;
-
     const backgroundTexture = PIXI.Texture.from('background.png');
 
     const background = new PIXI.TilingSprite({ texture: backgroundTexture, width: app.canvas.width, height: app.canvas.height });
@@ -89,7 +87,7 @@ let entities = [];
                 // ...otherwise, start from the beginning
                 else entity.setAnimation('walk');
 
-            // if the walk animation is playing but the entity isn't moving, set the animation to idle
+                // if the walk animation is playing but the entity isn't moving, set the animation to idle
             } else if (entity.body.label.includes('walk')) entity.setAnimation('idle');
 
             entity.sync();
@@ -114,8 +112,6 @@ class Entity extends PIXI.Sprite {
         this.targetPosition = this.position;
         this.speed = 0;
         this.anchor.set(.5);
-        this.animation = animation;
-        this.animationFullName = this.label + '_' + this.animation + '_' + this.facing;
         this.bodySpritesheet = 'spritesheets/' + this.label + '.json';
         this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
 
@@ -133,7 +129,7 @@ class Entity extends PIXI.Sprite {
 
                 animation.label = Object.keys(bodyAnimations)[i];
                 animation.updateAnchor = true;
-                
+
                 shadow.label = Object.keys(shadowAnimations)[i];
                 shadow.updateAnchor = animation.updateAnchor;
 
@@ -141,10 +137,9 @@ class Entity extends PIXI.Sprite {
 
                 this.animations.push(animation);
             }
-
             app.stage.addChild(this);
 
-            this.setAnimation(this.animation);
+            this.setAnimation(animation);
 
             entities.push(this);
         })();
@@ -167,7 +162,7 @@ class Entity extends PIXI.Sprite {
         // If a body exists, save its current frame, then remove it and its shadow from the stage
         if (this.body) {
 
-            if(!playFromBeginning) startFrame = this.body.currentFrame;
+            if (!playFromBeginning) startFrame = this.body.currentFrame;
 
             this.body.stop();
 
@@ -176,7 +171,7 @@ class Entity extends PIXI.Sprite {
         }
         // set body to the specified animation     
         this.body = this.animations.find(a => a.label === animation);
-        
+
         // add the body and its shadow to the stage and set all necessary properties
         app.stage.addChild(this.body);
         app.stage.addChild(this.body.shadow);
@@ -192,13 +187,13 @@ class Entity extends PIXI.Sprite {
      * @author Andrew Rogers
      */
     sync = () => {
-            
-            this.body.position.set(this.position.x, this.position.y);
-            this.body.shadow.position.set(this.body.position.x, this.body.position.y);
 
-            this.body.shadow.animationSpeed = this.body.animationSpeed;
-            this.body.shadow.currentFrame = this.body.currentFrame;
-        }
+        this.body.position.set(this.position.x, this.position.y);
+        this.body.shadow.position.set(this.body.position.x, this.body.position.y);
+
+        this.body.shadow.animationSpeed = this.body.animationSpeed;
+        this.body.shadow.currentFrame = this.body.currentFrame;
+    }
     moveTo = (x, y) => {
 
         this.targetPosition = { x, y };

@@ -4,28 +4,27 @@
 // We've asked for help in  this issue: https://github.com/pixijs/pixijs/discussions/11280
 // Unfortunately the only solution we have found is toggling this line:
 // import * as PIXI from './pixi.js';
-import { app, loadAsset, entities } from './globals.js';
-import Entity from './entity.js';
+import PlainsOfShinar from './globals.js';
 import Player from './player.js';
 
 (async () => {
     // app = new PIXI.Application();
-    await app.init({ width: 1920, height: 1080, renderer: new PIXI.WebGPURenderer() });
+    await PlainsOfShinar.app.init({ width: 1920, height: 1080, renderer: new PIXI.WebGPURenderer() });
 
-    document.body.appendChild(app.canvas);
+    document.body.appendChild(PlainsOfShinar.app.canvas);
 
-    await loadAsset('background.png');
+    await PlainsOfShinar.loadAsset('background.png');
 
     const backgroundTexture = PIXI.Texture.from('background.png');
 
-    const background = new PIXI.TilingSprite({ texture: backgroundTexture, width: app.canvas.width, height: app.canvas.height });
+    const background = new PIXI.TilingSprite({ texture: backgroundTexture, width: PlainsOfShinar.app.canvas.width, height: PlainsOfShinar.app.canvas.height });
 
     background.tileScale.y = .33;
     background.tileTransform.rotation = .66;
-    app.stage.addChild(background);
+    PlainsOfShinar.app.stage.addChild(background);
 
-    app.stage.scale.x = app.canvas.width / background.width;
-    app.stage.scale.y = app.canvas.height / background.height;
+    PlainsOfShinar.app.stage.scale.x = PlainsOfShinar.app.canvas.width / background.width;
+    PlainsOfShinar.app.stage.scale.y = PlainsOfShinar.app.canvas.height / background.height;
 
     const player = new Player();
 
@@ -33,17 +32,17 @@ import Player from './player.js';
     let mouseX = 0;
     let mouseY = 0;
 
-    app.canvas.addEventListener('pointermove', (event) => {
-        const rect = app.canvas.getBoundingClientRect();
-        mouseX = (event.clientX - rect.left) / app.stage.scale.x;
-        mouseY = (event.clientY - rect.top) / app.stage.scale.y;
+    PlainsOfShinar.app.canvas.addEventListener('pointermove', (event) => {
+        const rect = PlainsOfShinar.app.canvas.getBoundingClientRect();
+        mouseX = (event.clientX - rect.left) / PlainsOfShinar.app.stage.scale.x;
+        mouseY = (event.clientY - rect.top) / PlainsOfShinar.app.stage.scale.y;
     });
 
-    app.canvas.addEventListener('pointerdown', () => PointerIsDown = true);
-    app.canvas.addEventListener('pointerup', () => PointerIsDown = false);
+    PlainsOfShinar.app.canvas.addEventListener('pointerdown', () => PointerIsDown = true);
+    PlainsOfShinar.app.canvas.addEventListener('pointerup', () => PointerIsDown = false);
 
     // stuff that runs every tick
-    app.ticker.add(() => {
+    PlainsOfShinar.app.ticker.add(() => {
 
         // TODO: Think about setting the entity to the width of its body,
         // and maybe making it an oval and adjusting its angle.
@@ -52,7 +51,7 @@ import Player from './player.js';
         if (PointerIsDown) player.moveTo(mouseX, mouseY);
 
         // every tick, for every entity
-        entities.forEach(entity => {
+        PlainsOfShinar.entities.forEach(entity => {
 
             // entity movement
             if (entity.targetPosition !== entity.position) {

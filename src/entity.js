@@ -1,4 +1,4 @@
-import { app, loadAsset, entities } from './globals.js';
+import PlainsOfShinar from './globals.js';
 
 export default class Entity extends PIXI.Sprite {
 
@@ -22,8 +22,8 @@ export default class Entity extends PIXI.Sprite {
         this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
 
         (async () => {
-            await loadAsset(this.bodySpritesheet);
-            await loadAsset(this.shadowSpritesheet);
+            await PlainsOfShinar.loadAsset(this.bodySpritesheet);
+            await PlainsOfShinar.loadAsset(this.shadowSpritesheet);
 
             const bodyAnimations = PIXI.Assets.cache.get(this.bodySpritesheet).data.animations;
             const shadowAnimations = PIXI.Assets.cache.get(this.shadowSpritesheet).data.animations;
@@ -43,11 +43,11 @@ export default class Entity extends PIXI.Sprite {
 
                 this.animations.push(animation);
             }
-            app.stage.addChild(this);
+            PlainsOfShinar.app.stage.addChild(this);
 
             this.setAnimation(animation);
 
-            entities.push(this);
+            PlainsOfShinar.entities.push(this);
         })();
     }
     setAnimation = (animation = 'default', playFromBeginning = true) => {
@@ -72,15 +72,15 @@ export default class Entity extends PIXI.Sprite {
 
             this.body.stop();
 
-            app.stage.removeChild(this.body);
-            app.stage.removeChild(this.body.shadow);
+            PlainsOfShinar.app.stage.removeChild(this.body);
+            PlainsOfShinar.app.stage.removeChild(this.body.shadow);
         }
         // set body to the specified animation     
         this.body = this.animations.find(a => a.label === animation);
 
         // add the body and its shadow to the stage and set all necessary properties
-        app.stage.addChild(this.body);
-        app.stage.addChild(this.body.shadow);
+        PlainsOfShinar.app.stage.addChild(this.body);
+        PlainsOfShinar.app.stage.addChild(this.body.shadow);
 
         this.body.currentFrame = startFrame;
         this.body.animationSpeed = .5;

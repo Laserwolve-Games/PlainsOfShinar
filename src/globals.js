@@ -1,10 +1,12 @@
-const app = new PIXI.Application();
+const PlainsOfShinar = {};
 
-const entities = [];
+PlainsOfShinar.app = new PIXI.Application();
 
-const loadAsset = async (asset) => {
+PlainsOfShinar.entities = [];
+
+PlainsOfShinar.loadAsset = async (asset) => {
 
     if (!PIXI.Assets.cache.has(asset)) await PIXI.Assets.load(asset);
 }
 
-export { app, loadAsset, entities };
+export default PlainsOfShinar;

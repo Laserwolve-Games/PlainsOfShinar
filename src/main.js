@@ -4,27 +4,29 @@
 // We've asked for help in  this issue: https://github.com/pixijs/pixijs/discussions/11280
 // Unfortunately the only solution we have found is toggling this line:
 // import * as PIXI from './pixi.js';
+
 import PlainsOfShinar from './globals.js';
 import Player from './player.js';
 
 (async () => {
-    // app = new PIXI.Application();
-    await PlainsOfShinar.app.init({ width: 1920, height: 1080, renderer: new PIXI.WebGPURenderer() });
+
+    await PlainsOfShinar.app.init({ width: 4096, height: 4096, renderer: new PIXI.WebGPURenderer() });
+
+    PlainsOfShinar.app.canvas.style.width = '4096px';
+    PlainsOfShinar.app.canvas.style.height = '4096px';
 
     document.body.appendChild(PlainsOfShinar.app.canvas);
 
     await PlainsOfShinar.loadAsset('background.png');
-
-    const backgroundTexture = PIXI.Texture.from('background.png');
-
-    const background = new PIXI.TilingSprite({ texture: backgroundTexture, width: PlainsOfShinar.app.canvas.width, height: PlainsOfShinar.app.canvas.height });
-
-    background.tileScale.y = .33;
-    background.tileTransform.rotation = .66;
+    
+    const background = new PIXI.TilingSprite({
+        texture: PIXI.Texture.from('background.png'),
+        width: PlainsOfShinar.app.canvas.width,
+        height: PlainsOfShinar.app.canvas.height
+    });
+    background.tileScale.y = .5;
+    background.tileTransform.rotation = .33;
     PlainsOfShinar.app.stage.addChild(background);
-
-    PlainsOfShinar.app.stage.scale.x = PlainsOfShinar.app.canvas.width / background.width;
-    PlainsOfShinar.app.stage.scale.y = PlainsOfShinar.app.canvas.height / background.height;
 
     const player = new Player();
 
@@ -33,6 +35,7 @@ import Player from './player.js';
     let mouseY = 0;
 
     PlainsOfShinar.app.canvas.addEventListener('pointermove', (event) => {
+
         const rect = PlainsOfShinar.app.canvas.getBoundingClientRect();
         mouseX = (event.clientX - rect.left) / PlainsOfShinar.app.stage.scale.x;
         mouseY = (event.clientY - rect.top) / PlainsOfShinar.app.stage.scale.y;
@@ -43,6 +46,9 @@ import Player from './player.js';
 
     // stuff that runs every tick
     PlainsOfShinar.app.ticker.add(() => {
+
+        // scroll to the player
+        window.scrollTo(player?.position.x - window.innerWidth / 2, player?.position.y - window.innerHeight / 2);
 
         // TODO: Think about setting the entity to the width of its body,
         // and maybe making it an oval and adjusting its angle.

@@ -1,4 +1,5 @@
 import PlainsOfShinar from './globals.js';
+// import PIXI from './pixi.js';
 
 export default class Entity extends PIXI.Sprite {
 
@@ -11,13 +12,23 @@ export default class Entity extends PIXI.Sprite {
         this.body = null; // stores the current animation
         this.label = name;
         this.width = size;
-        this.height = this.width / 2;
+        this.height = this.width;
         this.position.set(x, y);
+
+        // this.rotation = Math.PI / 4;
+
+        // this.hitArea = new PIXI.Polygon([
+        //     -this.width / 2, 0,
+        //     0, -this.height / 2,
+        //     this.width / 2, 0,
+        //     0, this.height / 2
+        // ]);
+
         this.facing = facing;
         this.actualFacing = facing;
         this.targetPosition = this.position;
         this.speed = 0;
-        this.anchor.set(.5);
+        // this.anchor.set(.5);
         this.bodySpritesheet = 'spritesheets/' + this.label + '.json';
         this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
 
@@ -93,6 +104,15 @@ export default class Entity extends PIXI.Sprite {
      * @author Andrew Rogers
      */
     sync = () => {
+
+        // this.mask = new PIXI.Graphics().rect(this.x, this.y, this.width / 2, this.height / 2).fill({ color: 0xffffff });
+
+        // this.mask = new PIXI.Graphics().poly(
+        //     this.x, this.y,
+        //     this.x + 10, this.y,
+        //     this.x + 10, this.y + 10,
+        //     this.x, this.y + 10,
+        // ).fill({ color: 0xffffff });
 
         this.body.position.set(this.position.x, this.position.y);
         this.body.shadow.position.set(this.body.position.x, this.body.position.y);

@@ -1,5 +1,3 @@
-// import * as PIXI from './pixi.js';
-
 const PlainsOfShinar = {};
 
 PlainsOfShinar.app = new PIXI.Application();

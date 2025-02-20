@@ -1,16 +1,11 @@
-// Intellisense doesn't work unless we use node.js/npm.
-// This doesn't work: /// <reference path='./pixi.js' />
-// Neither does a jsconfig.json file, or a global.d.ts file.
-// We've asked for help in  this issue: https://github.com/pixijs/pixijs/discussions/11280
-// Unfortunately the only solution we have found is toggling this line:
-// import * as PIXI from './pixi.js';
-
 import PlainsOfShinar from './globals.js';
 import Player from './player.js';
 
 (async () => {
 
-    await PlainsOfShinar.app.init({ width: 4096, height: 4096, renderer: new PIXI.WebGPURenderer() });
+    await PlainsOfShinar.app.init({ width: 4096, height: 4096, 
+        preference: 'webgpu',
+    });
 
     PlainsOfShinar.app.canvas.style.width = '4096px';
     PlainsOfShinar.app.canvas.style.height = '4096px';
@@ -46,6 +41,8 @@ import Player from './player.js';
 
     // stuff that runs every tick
     PlainsOfShinar.app.ticker.add(() => {
+
+        // console.log(PlainsOfShinar.app.renderer);
 
         // scroll to the player
         window.scrollTo(player?.position.x - window.innerWidth / 2, player?.position.y - window.innerHeight / 2);

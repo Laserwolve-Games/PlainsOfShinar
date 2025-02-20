@@ -12,16 +12,14 @@ export default class Entity extends PIXI.Sprite {
         this.body = null; // stores the current animation
         this.label = name;
         this.width = size;
-        this.height = this.width;
+        this.height = this.width / 2;
         this.position.set(x, y);
-
-        // this.rotation = Math.PI / 4;
 
         this.facing = facing;
         this.actualFacing = facing;
         this.targetPosition = this.position;
         this.speed = 0;
-        // this.anchor.set(.5);
+        this.anchor.set(.5);
         this.bodySpritesheet = 'spritesheets/' + this.label + '.json';
         this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
 
@@ -98,21 +96,21 @@ export default class Entity extends PIXI.Sprite {
      */
     sync = () => {
 
-        // this.mask = null;
-
+        // Create an isometric diamond mask that compensates for the anchor point
         this.mask = new PIXI.Graphics().poly([
 
-            this.x + 10, this.y,
-            this.x + this.width, this.y,
-            this.x + this.width, this.y + this.height,
-            this.x, this.y + this.height,
+            this.x, this.y - this.height / 2,
+            this.x + this.width / 2, this.y,
+            this.x, this.y + this.height / 2,
+            this.x - this.width  / 2, this.y,
 
         ]).fill({ color: 0xffffff });
+
+        //TODO: hit area with the same dimensions as above
 
         this.body.position.set(this.position.x, this.position.y);
         this.body.shadow.position.set(this.body.position.x, this.body.position.y);
 
-        this.body.shadow.animationSpeed = this.body.animationSpeed;
         this.body.shadow.currentFrame = this.body.currentFrame;
     }
     moveTo = (x, y) => {

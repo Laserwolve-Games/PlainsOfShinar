@@ -25,7 +25,7 @@ import Player from './player.js';
         height: PlainsOfShinar.app.canvas.height
     });
     background.tileScale.y = .5;
-    background.tileTransform.rotation = .33;
+    background.tileTransform.rotation = .5;
     PlainsOfShinar.app.stage.addChild(background);
 
     const player = new Player();

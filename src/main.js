@@ -1,10 +1,15 @@
 import PlainsOfShinar from './globals.js';
 import Player from './player.js';
 
+// No Intellisense. Bug: https://github.com/Laserwolve-Games/PlainsOfShinar/issues/1
+// import * as PIXI from './pixi.js';
+
 (async () => {
 
-    await PlainsOfShinar.app.init({ width: 4096, height: 4096, 
-        preference: 'webgpu',
+    await PlainsOfShinar.app.init({ width: 4096, height: 4096,
+        
+        // Can't use WebGPU. Bug: https://github.com/Laserwolve-Games/PlainsOfShinar/issues/2
+        preference: 'webgl'
     });
 
     PlainsOfShinar.app.canvas.style.width = '4096px';

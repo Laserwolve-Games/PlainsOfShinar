@@ -8,8 +8,7 @@ import Player from './player.js';
 
     await PlainsOfShinar.app.init({ width: 4096, height: 4096,
         
-        // Can't use WebGPU. Bug: https://github.com/Laserwolve-Games/PlainsOfShinar/issues/2
-        preference: 'webgl'
+        preference: 'webgpu'
     });
 
     PlainsOfShinar.app.canvas.style.width = '4096px';
@@ -18,6 +17,10 @@ import Player from './player.js';
     document.body.appendChild(PlainsOfShinar.app.canvas);
 
     await PlainsOfShinar.loadAsset('background.png');
+
+    await PlainsOfShinar.loadAsset('spritesheets/manifest.json');
+
+    PlainsOfShinar.manifest = PIXI.Assets.cache.get('spritesheets/manifest.json');
     
     const background = new PIXI.TilingSprite({
         texture: PIXI.Texture.from('background.png'),

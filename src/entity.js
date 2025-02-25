@@ -10,6 +10,7 @@ export default class Entity extends PIXI.Sprite {
         // this.visible = false;
         this.animations = [];
         this.body = null; // stores the current animation
+        this.shadow = null; // stores the current shadow
         this.label = name;
         this.width = size;
         this.height = this.width / 2;
@@ -20,28 +21,24 @@ export default class Entity extends PIXI.Sprite {
         this.targetPosition = this.position;
         this.speed = 0;
         this.anchor.set(.5);
-        this.bodySpritesheet = 'spritesheets/' + this.label + '.json';
-        this.shadowSpritesheet = 'spritesheets/' + this.label + '_shadow.json';
+
+        // The paths to all animation JSON files for this entity
+        const jsonPaths = PlainsOfShinar.manifest[this.label];
 
         (async () => {
-            await PlainsOfShinar.loadAsset(this.bodySpritesheet);
-            await PlainsOfShinar.loadAsset(this.shadowSpritesheet);
 
-            const bodyAnimations = PIXI.Assets.cache.get(this.bodySpritesheet).data.animations;
-            const shadowAnimations = PIXI.Assets.cache.get(this.shadowSpritesheet).data.animations;
+            for (const animation of jsonPaths) await PlainsOfShinar.loadAsset(animation);
+
+            const bodyAnimations = PIXI.Assets.cache.get(jsonPaths[0]).data.animations;
 
             for (let i = 0; i < Object.keys(bodyAnimations).length; i++) {
 
+                // if(Object.keys(bodyAnimations)[i].includes('shadow'))
+
                 const animation = PIXI.AnimatedSprite.fromFrames(bodyAnimations[Object.keys(bodyAnimations)[i]]);
-                const shadow = PIXI.AnimatedSprite.fromFrames(shadowAnimations[Object.keys(shadowAnimations)[i]]);
 
                 animation.label = Object.keys(bodyAnimations)[i];
                 animation.updateAnchor = true;
-
-                shadow.label = Object.keys(shadowAnimations)[i];
-                shadow.updateAnchor = animation.updateAnchor;
-
-                animation.shadow = shadow;
 
                 this.animations.push(animation);
             }
@@ -75,20 +72,21 @@ export default class Entity extends PIXI.Sprite {
             this.body.stop();
 
             PlainsOfShinar.app.stage.removeChild(this.body);
-            PlainsOfShinar.app.stage.removeChild(this.body.shadow);
+            PlainsOfShinar.app.stage.removeChild(this.shadow);
         }
         // set body to the specified animation     
         this.body = this.animations.find(a => a.label === animation);
+        this.shadow = this.animations.find(a => a.label === 'shadow_' + animation);
 
         // add the body and its shadow to the stage and set all necessary properties
         PlainsOfShinar.app.stage.addChild(this.body);
-        PlainsOfShinar.app.stage.addChild(this.body.shadow);
+        PlainsOfShinar.app.stage.addChild(this.shadow);
 
         this.body.currentFrame = startFrame;
         this.body.animationSpeed = .5;
 
         this.body.play();
-        this.body.shadow.play();
+        // this.body.shadow.play();
     }
     /**
      * Keeps bodies, shadows, and (soon) gear in sync with their entities.
@@ -109,9 +107,9 @@ export default class Entity extends PIXI.Sprite {
         //TODO: hit area with the same dimensions as above
 
         this.body.position.set(this.position.x, this.position.y);
-        this.body.shadow.position.set(this.body.position.x, this.body.position.y);
+        this.shadow.position.set(this.body.position.x, this.body.position.y);
 
-        this.body.shadow.currentFrame = this.body.currentFrame;
+        this.shadow.currentFrame = this.body.currentFrame;
     }
     moveTo = (x, y) => {
 

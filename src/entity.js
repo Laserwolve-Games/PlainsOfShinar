@@ -40,6 +40,7 @@ export default class Entity extends PIXI.Sprite {
 
                 animation.label = Object.keys(bodyAnimations)[i];
                 animation.updateAnchor = true;
+                animation.interactive = false;
 
                 this.animations.push(animation);
             }
@@ -95,17 +96,20 @@ export default class Entity extends PIXI.Sprite {
      */
     sync = () => {
 
-        // Create an isometric diamond mask that compensates for the anchor point
-        this.mask = new PIXI.Graphics().poly([
+        /**
+         * An isometric diamond mask that compensates for the anchor point.
+         * @author Andrew Rogers
+         */
+        const polygon = [
 
             this.x, this.y - this.height / 2,
             this.x + this.width / 2, this.y,
             this.x, this.y + this.height / 2,
             this.x - this.width  / 2, this.y,
-
-        ]).fill({ color: 0xffffff });
-
-        //TODO: hit area with the same dimensions as above
+        ];
+        // Make the entity's hit area and visual representation an isometric diamond
+        this.mask = new PIXI.Graphics().poly(polygon).fill({ color: 0xffffff });
+        this.hitArea = new PIXI.Polygon(polygon);
 
         this.body.position.set(this.position.x, this.position.y);
         this.shadow.position.set(this.body.position.x, this.body.position.y);

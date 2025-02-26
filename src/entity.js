@@ -1,6 +1,7 @@
 import PlainsOfShinar from './globals.js';
 // import PIXI from './pixi.js';
 
+// Can't extend PIXI.Container: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/3
 export default class Entity extends PIXI.Sprite {
 
     constructor(name, animation, size, x, y, facing) {

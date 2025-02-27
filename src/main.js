@@ -34,7 +34,7 @@ import Player from './player.js';
 
     const player = new Player();
 
-    const barrel = new Entity('tutorial', 'barrel', 'default', 50, 300, 600, false);
+    const barrel = new Entity('tutorial', 'barrel', 'default', 200, 300, 600, false);
 
     let PointerIsDown = false;
     let mouseX = 0;
@@ -52,8 +52,6 @@ import Player from './player.js';
 
     // stuff that runs every tick
     PlainsOfShinar.app.ticker.add(() => {
-
-        // console.log(PlainsOfShinar.app.renderer);
 
         // scroll to the player
         window.scrollTo(player?.position.x - window.innerWidth / 2, player?.position.y - window.innerHeight / 2);

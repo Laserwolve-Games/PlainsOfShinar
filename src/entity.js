@@ -17,6 +17,8 @@ export default class Entity extends PIXI.Sprite {
         this.height = this.width / 2;
         this.position.set(x, y);
         this.set = set;
+        this.mask = new PIXI.Graphics();
+        this.hitArea = new PIXI.Polygon();
 
         this.facing = initialFacing;
         this.actualFacing = initialFacing;
@@ -127,8 +129,10 @@ export default class Entity extends PIXI.Sprite {
             this.x - this.width / 2, this.y,
         ];
         // Make the entity's hit area and visual representation an isometric diamond
-        this.mask = new PIXI.Graphics().poly(polygon).fill({ color: 0xffffff });
-        this.hitArea = new PIXI.Polygon(polygon);
+        this.mask = this.mask.poly(polygon).fill({ color: 0xffffff });
+        this.hitArea.points = polygon;
+
+        console.log(this.mask);
 
         this.body.position.set(this.position.x, this.position.y);
         this.shadow.position.set(this.body.position.x, this.body.position.y);

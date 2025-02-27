@@ -6,7 +6,7 @@ export default class Entity extends PIXI.Sprite {
 
     constructor(set, name, animation, size, x, y, isAnimated, initialFacing = 0) {
 
-        super(PIXI.Texture.WHITE);
+        super();
 
         // this.visible = false;
         this.animations = [];
@@ -17,8 +17,19 @@ export default class Entity extends PIXI.Sprite {
         this.height = this.width / 2;
         this.position.set(x, y);
         this.set = set;
-        this.mask = new PIXI.Graphics();
-        this.hitArea = new PIXI.Polygon();
+
+        const isometricDiamond = [
+            0, -this.height / 2,
+            this.width / 2, 0,
+            0, this.height / 2,
+            -this.width / 2, 0
+        ];
+        const randomColor = Math.floor(Math.random() * 16777215);
+
+        this.visualRepresentation = new PIXI.Graphics().poly(isometricDiamond).fill(randomColor);
+        this.hitArea = new PIXI.Polygon(isometricDiamond);
+
+        PlainsOfShinar.app.stage.addChild(this.visualRepresentation);
 
         this.facing = initialFacing;
         this.actualFacing = initialFacing;
@@ -63,6 +74,7 @@ export default class Entity extends PIXI.Sprite {
                 this.shadow = PIXI.Sprite.from('shadow_' + this.label + '_default_90_000');
 
                 this.body.label = 'default';
+                this.body.updateAnchor = true;
                 this.body.interactive = false;
 
                 PlainsOfShinar.app.stage.addChild(this.body);
@@ -117,25 +129,9 @@ export default class Entity extends PIXI.Sprite {
      */
     sync = () => {
 
-        /**
-         * An isometric diamond mask that compensates for the anchor point.
-         * @author Andrew Rogers
-         */
-        const polygon = [
-
-            this.x, this.y - this.height / 2,
-            this.x + this.width / 2, this.y,
-            this.x, this.y + this.height / 2,
-            this.x - this.width / 2, this.y,
-        ];
-        // Make the entity's hit area and visual representation an isometric diamond
-        this.mask = this.mask.poly(polygon).fill({ color: 0xffffff });
-        this.hitArea.points = polygon;
-
-        console.log(this.mask);
-
         this.body.position.set(this.position.x, this.position.y);
         this.shadow.position.set(this.body.position.x, this.body.position.y);
+        this.visualRepresentation.position.set(this.position.x, this.position.y);
 
         this.shadow.currentFrame = this.body.currentFrame;
     }

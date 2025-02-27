@@ -1,4 +1,5 @@
 import PlainsOfShinar from './globals.js';
+import Entity from './entity.js';
 import Player from './player.js';
 
 // No Intellisense. Bug: https://github.com/Laserwolve-Games/PlainsOfShinar/issues/1
@@ -32,6 +33,8 @@ import Player from './player.js';
     PlainsOfShinar.app.stage.addChild(background);
 
     const player = new Player();
+
+    const barrel = new Entity('tutorial', 'barrel', 'default', 50, 300, 600, false);
 
     let PointerIsDown = false;
     let mouseX = 0;

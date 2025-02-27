@@ -4,7 +4,7 @@ import PlainsOfShinar from './globals.js';
 // Can't extend PIXI.Container: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/3
 export default class Entity extends PIXI.Sprite {
 
-    constructor(name, animation, size, x, y, facing) {
+    constructor(set, name, animation, size, x, y, isAnimated, initialFacing = 0) {
 
         super(PIXI.Texture.WHITE);
 
@@ -16,44 +16,64 @@ export default class Entity extends PIXI.Sprite {
         this.width = size;
         this.height = this.width / 2;
         this.position.set(x, y);
+        this.set = set;
 
-        this.facing = facing;
-        this.actualFacing = facing;
+        this.facing = initialFacing;
+        this.actualFacing = initialFacing;
         this.targetPosition = this.position;
         this.speed = 0;
         this.anchor.set(.5);
 
-        // The paths to all animation JSON files for this entity
-        const jsonPaths = PlainsOfShinar.manifest[this.label];
+        // The paths to all files for this set
+        const jsonPaths = PlainsOfShinar.manifest[this.set];
 
         (async () => {
 
             for (const animation of jsonPaths) await PlainsOfShinar.loadAsset(animation);
 
-            const bodyAnimations = PIXI.Assets.cache.get(jsonPaths[0]).data.animations;
+            if (isAnimated) {
 
-            for (let i = 0; i < Object.keys(bodyAnimations).length; i++) {
+                // For animated entities, the first JSON file is animation data
+                const animationData = PIXI.Assets.cache.get(jsonPaths[0]).data.animations;
 
-                // if(Object.keys(bodyAnimations)[i].includes('shadow'))
+                for (let i = 0; i < Object.keys(animationData).length; i++) {
 
-                const animation = PIXI.AnimatedSprite.fromFrames(bodyAnimations[Object.keys(bodyAnimations)[i]]);
+                    // fromFrames pulls from the Pixi cache
+                    const animation = PIXI.AnimatedSprite.fromFrames(animationData[Object.keys(animationData)[i]]);
 
-                animation.label = Object.keys(bodyAnimations)[i];
-                animation.updateAnchor = true;
-                animation.interactive = false;
+                    animation.label = Object.keys(animationData)[i];
+                    animation.updateAnchor = true;
+                    animation.interactive = false;
 
-                this.animations.push(animation);
+                    this.animations.push(animation);
+                }
+                PlainsOfShinar.app.stage.addChild(this);
+
+                this.setAnimation(animation);
+
+                PlainsOfShinar.entities.push(this);
             }
-            PlainsOfShinar.app.stage.addChild(this);
+            else {
 
-            this.setAnimation(animation);
+                // Don't call this.setAnimation() because it's not animated
+                // Just set everything once here
+                this.body = PIXI.Sprite.from(this.label + '_default_90_000');
+                this.shadow = PIXI.Sprite.from('shadow_' + this.label + '_default_90_000');
 
-            PlainsOfShinar.entities.push(this);
+                this.body.label = 'default';
+                this.body.interactive = false;
+
+                PlainsOfShinar.app.stage.addChild(this.body);
+                PlainsOfShinar.app.stage.addChild(this.shadow);
+
+                PlainsOfShinar.entities.push(this);
+            }
         })();
     }
-    setAnimation = (animation = 'default', playFromBeginning = true) => {
+    setAnimation = (animation, playFromBeginning = true) => {
 
         let startFrame = 0;
+
         animation = this.label + '_' + animation + '_' + this.facing;
 
         // If the current animation is the same as the new one...
@@ -65,7 +85,6 @@ export default class Entity extends PIXI.Sprite {
             // then exit
             return;
         }
-
         // If a body exists, save its current frame, then remove it and its shadow from the stage
         if (this.body) {
 
@@ -78,6 +97,7 @@ export default class Entity extends PIXI.Sprite {
         }
         // set body to the specified animation     
         this.body = this.animations.find(a => a.label === animation);
+
         this.shadow = this.animations.find(a => a.label === 'shadow_' + animation);
 
         // add the body and its shadow to the stage and set all necessary properties
@@ -88,7 +108,6 @@ export default class Entity extends PIXI.Sprite {
         this.body.animationSpeed = .5;
 
         this.body.play();
-        // this.body.shadow.play();
     }
     /**
      * Keeps bodies, shadows, and (soon) gear in sync with their entities.
@@ -105,7 +124,7 @@ export default class Entity extends PIXI.Sprite {
             this.x, this.y - this.height / 2,
             this.x + this.width / 2, this.y,
             this.x, this.y + this.height / 2,
-            this.x - this.width  / 2, this.y,
+            this.x - this.width / 2, this.y,
         ];
         // Make the entity's hit area and visual representation an isometric diamond
         this.mask = new PIXI.Graphics().poly(polygon).fill({ color: 0xffffff });

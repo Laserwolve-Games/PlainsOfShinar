@@ -26,17 +26,18 @@ export default class Entity extends PIXI.Sprite {
             -this.width / 2, 0
         ];
         const randomColor = Math.floor(Math.random() * 16777215);
+        const graphic = new PIXI.Graphics().poly(isometricDiamond).fill(randomColor);
 
-        this.visualRepresentation = new PIXI.Graphics().poly(isometricDiamond).fill(randomColor);
+        // Set the texture here instead of in the constructor so we can use this.height/width
+        this.texture = PlainsOfShinar.app.renderer.generateTexture(graphic, 'nearest', 1);
         this.hitArea = new PIXI.Polygon(isometricDiamond);
-
-        PlainsOfShinar.app.stage.addChild(this.visualRepresentation);
-
         this.facing = initialFacing;
         this.actualFacing = initialFacing;
         this.targetPosition = this.position;
         this.speed = 0;
         this.anchor.set(.5);
+
+        PlainsOfShinar.app.stage.addChild(this);
 
         // The paths to all files for this set
         const jsonPaths = PlainsOfShinar.manifest[this.set];
@@ -132,7 +133,6 @@ export default class Entity extends PIXI.Sprite {
 
         this.body.position.set(this.position.x, this.position.y);
         this.shadow.position.set(this.body.position.x, this.body.position.y);
-        this.visualRepresentation.position.set(this.position.x, this.position.y);
 
         this.shadow.currentFrame = this.body.currentFrame;
     }

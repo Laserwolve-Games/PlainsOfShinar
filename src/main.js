@@ -63,9 +63,12 @@ import Player from './player.js';
 
         if (PointerIsDown) player.moveTo(mouseX, mouseY);
 
-        // Sort entities by their Y position to determine their z-index
+        // Sort entities by their Y position to determine the z-index of their bodies
         PlainsOfShinar.entities.sort((a, b) => a.position.y - b.position.y).forEach((entity, index) => {
-            entity.zIndex = index;
+
+            // The background lives at zIndex 0, so we need plus 1
+            entity.body.zIndex = 1 + index * 2;
+            entity.shadow.zIndex = 1 + index * 2 - 1;
         });
 
         // every tick, for every entity

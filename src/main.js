@@ -57,64 +57,18 @@ import Player from './player.js';
         // scroll to the player
         window.scrollTo(player?.position.x - window.innerWidth / 2, player?.position.y - window.innerHeight / 2);
 
-        // TODO: Think about setting the entity to the width of its body,
-        // and maybe making it an oval and adjusting its angle.
-        // player.body.position.set(player.position.x, player.position.y);
-
         if (PointerIsDown) player.moveTo(mouseX, mouseY);
 
-        // Sort entities by their Y position to determine the z-index of their bodies
-        PlainsOfShinar.entities.sort((a, b) => a.position.y - b.position.y).forEach((entity, index) => {
-
-            // The background lives at zIndex 0, so we need plus 1
-            entity.body.zIndex = 1 + index * 2;
-            entity.shadow.zIndex = 1 + index * 2 - 1;
-        });
+        Entity.sort();
 
         // every tick, for every entity
         PlainsOfShinar.entities.forEach(entity => {
 
-            // entity movement
-            if (entity.targetPosition !== entity.position) {
+            entity.handleMovement();
 
-                const dx = entity.targetPosition.x - entity.position.x;
-                const dy = entity.targetPosition.y - entity.position.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                entity.actualSpeed = isometrify(entity.speed, entity.actualFacing);
-
-                if (distance > entity.actualSpeed) {
-
-                    entity.isMoving = true;
-
-                    entity.position.x += (dx / distance) * entity.actualSpeed;
-                    entity.position.y += (dy / distance) * entity.actualSpeed;
-
-                } else {
-
-                    entity.isMoving = false;
-
-                    entity.targetPosition = entity.position;
-                }
-            }
-            if (entity.isMoving) {
-
-                entity.calculateFacing(entity.position.x, entity.position.y, entity.targetPosition.x, entity.targetPosition.y);
-
-                // If the entity already was walking, play from the current frame...
-                if (entity.body.label.includes('walk')) entity.setAnimation('walk', false);
-
-                // ...otherwise, start from the beginning
-                else entity.setAnimation('walk');
-
-                // if the walk animation is playing but the entity isn't moving, set the animation to idle
-            } else if (entity.body.label.includes('walk')) entity.setAnimation('idle');
+            entity.handleMovementAnimations();
 
             entity.sync();
         });
     });
 })();
-
-const isometrify = (value, angle) => value * lerp(.5, 1, Math.abs(Math.abs(angle) - 90) / 90);
-
-const lerp = (a, b, x) => a + x * (b - a);

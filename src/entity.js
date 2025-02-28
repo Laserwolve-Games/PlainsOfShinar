@@ -156,4 +156,58 @@ export default class Entity extends PIXI.Sprite {
 
         this.facing = facing;
     }
+    handleMovement = () => {
+
+        if (this.targetPosition !== this.position) {
+
+            const dx = this.targetPosition.x - this.position.x;
+            const dy = this.targetPosition.y - this.position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            this.actualSpeed = PlainsOfShinar.isometrify(this.speed, this.actualFacing);
+
+            if (distance > this.actualSpeed) {
+
+            this.isMoving = true;
+
+            this.position.x += (dx / distance) * this.actualSpeed;
+            this.position.y += (dy / distance) * this.actualSpeed;
+
+            } else {
+
+            this.isMoving = false;
+
+            this.targetPosition = this.position;
+            }
+        }
+    
+    }
+    handleMovementAnimations = () => {
+
+        if (this.isMoving) {
+
+            this.calculateFacing(this.position.x, this.position.y, this.targetPosition.x, this.targetPosition.y);
+
+            // If the entity already was walking, play from the current frame...
+            if (this.body.label.includes('walk')) this.setAnimation('walk', false);
+
+            // ...otherwise, start from the beginning
+            else this.setAnimation('walk');
+
+            // if the walk animation is playing but the entity isn't moving, set the animation to idle
+        } else if (this.body.label.includes('walk')) this.setAnimation('idle');
+    }
+    /**
+     * Sort entities by their Y position to determine the zIndex of their bodies and shadows.
+     * @author Andrew Rogers
+     */
+    static sort() {
+
+        PlainsOfShinar.entities.sort((a, b) => a.position.y - b.position.y).forEach((entity, index) => {
+
+            // The background lives at zIndex 0, so we need plus 1
+            entity.body.zIndex = 1 + index * 2;
+            entity.shadow.zIndex = 1 + index * 2 - 1;
+        });
+    }
 }

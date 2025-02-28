@@ -7,8 +7,9 @@ import Player from './player.js';
 
 (async () => {
 
-    await PlainsOfShinar.app.init({ width: 4096, height: 4096,
-        
+    await PlainsOfShinar.app.init({
+        width: 4096, height: 4096,
+
         preference: 'webgpu'
     });
 
@@ -22,7 +23,7 @@ import Player from './player.js';
     await PlainsOfShinar.loadAsset('spritesheets/manifest.json');
 
     PlainsOfShinar.manifest = PIXI.Assets.cache.get('spritesheets/manifest.json');
-    
+
     const background = new PIXI.TilingSprite({
         texture: PIXI.Texture.from('background.png'),
         width: PlainsOfShinar.app.canvas.width,
@@ -61,6 +62,11 @@ import Player from './player.js';
         // player.body.position.set(player.position.x, player.position.y);
 
         if (PointerIsDown) player.moveTo(mouseX, mouseY);
+
+        // Sort entities by their Y position to determine their z-index
+        PlainsOfShinar.entities.sort((a, b) => a.position.y - b.position.y).forEach((entity, index) => {
+            entity.zIndex = index;
+        });
 
         // every tick, for every entity
         PlainsOfShinar.entities.forEach(entity => {

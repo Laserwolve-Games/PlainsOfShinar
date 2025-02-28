@@ -30,7 +30,6 @@ export default class Entity extends PIXI.Sprite {
 
         // Set the texture here instead of in the constructor so we can use this.height/width
         this.texture = PlainsOfShinar.app.renderer.generateTexture(graphic, 'nearest', 1);
-        this.hitArea = new PIXI.Polygon(isometricDiamond);
         this.facing = initialFacing;
         this.actualFacing = initialFacing;
         this.targetPosition = this.position;
@@ -131,6 +130,13 @@ export default class Entity extends PIXI.Sprite {
      */
     sync = () => {
 
+        this.collisionBox = [
+            this.position.x, this.position.y - this.height / 2,
+            this.position.x + this.width / 2, this.position.y,
+            this.position.x, this.position.y + this.height / 2,
+            this.position.x - this.width / 2, this.position.y
+        ];
+
         this.body.position.set(this.position.x, this.position.y);
         this.shadow.position.set(this.body.position.x, this.body.position.y);
 
@@ -168,19 +174,50 @@ export default class Entity extends PIXI.Sprite {
 
             if (distance > this.actualSpeed) {
 
-            this.isMoving = true;
+                /*
+                 TODO: Issues with this system:
+                 Theoretically, the faster an entity moves, the further away it'll stop from other entities.
+                 Also the age-old problem of an entity moving fast enough that it's collision polygon would
+                 completely jump over another entity's collision polygon in a single tick.
+                 */
+                const nextX = this.position.x + (dx / distance) * this.actualSpeed;
+                const nextY = this.position.y + (dy / distance) * this.actualSpeed;
 
-            this.position.x += (dx / distance) * this.actualSpeed;
-            this.position.y += (dy / distance) * this.actualSpeed;
+                const nextCollisionBox = [
+                    nextX, nextY - this.height / 2,
+                    nextX + this.width / 2, nextY,
+                    nextX, nextY + this.height / 2,
+                    nextX - this.width / 2, nextY
+                ];
+
+                for (const entity of PlainsOfShinar.entities) {
+
+                    // TODO: optimize this because right now it'll check every moving entity against every other entity everywhere
+                    if (entity !== this && PlainsOfShinar.collisionCheck(nextCollisionBox, entity.collisionBox)) {
+
+                        // TODO: this is still firing when one entity 'grinds' into another;
+                        // i.e. the entity is not moving but the engine thinks it is repeatedly colliding
+                        console.log(this.label + ' collided with entity:', entity.label);
+
+                        this.isMoving = false;
+                        this.targetPosition = this.position;
+                        return;
+                    }
+                }
+
+                this.isMoving = true;
+
+                this.position.x = nextX;
+                this.position.y = nextY;
 
             } else {
 
-            this.isMoving = false;
+                this.isMoving = false;
 
-            this.targetPosition = this.position;
+                this.targetPosition = this.position;
             }
         }
-    
+
     }
     handleMovementAnimations = () => {
 

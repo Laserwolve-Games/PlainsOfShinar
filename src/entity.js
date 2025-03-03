@@ -1,5 +1,5 @@
 import PlainsOfShinar from './globals.js';
-// import PIXI from './pixi.js';
+// import PIXI from 'C:/pixi.js';
 
 // Can't extend PIXI.Container: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/3
 // Can't extend PIXI.Graphics because we need this.anchor
@@ -174,12 +174,7 @@ export default class Entity extends PIXI.Sprite {
 
             if (distance > this.actualSpeed) {
 
-                /*
-                 TODO: Issues with this system:
-                 Theoretically, the faster an entity moves, the further away it'll stop from other entities.
-                 Also the age-old problem of an entity moving fast enough that it's collision polygon would
-                 completely jump over another entity's collision polygon in a single tick.
-                 */
+                // Collision system: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/4
                 const nextX = this.position.x + (dx / distance) * this.actualSpeed;
                 const nextY = this.position.y + (dy / distance) * this.actualSpeed;
 

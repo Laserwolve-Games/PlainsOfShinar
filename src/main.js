@@ -35,7 +35,7 @@ import Player from './player.js';
 
     const player = new Player();
 
-    const barrel = new Entity('tutorial', 'barrel', 'default', 200, 300, 600, false);
+    const barrel = new Entity('tutorial', 'barrel', 'default', 200, 300, 600);
 
     let PointerIsDown = false;
     let mouseX = 0;

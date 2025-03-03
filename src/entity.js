@@ -5,7 +5,7 @@ import PlainsOfShinar from './globals.js';
 // Can't extend PIXI.Graphics because we need this.anchor
 export default class Entity extends PIXI.Sprite {
 
-    constructor(set, name, animation, size, x, y, isAnimated, initialFacing = 0) {
+    constructor(set, name, animation, size, x, y, initialFacing = 0) {
 
         super();
 
@@ -45,10 +45,11 @@ export default class Entity extends PIXI.Sprite {
 
             for (const animation of jsonPaths) await PlainsOfShinar.loadAsset(animation);
 
-            if (isAnimated) {
+            // For animated entities, the first JSON file is animation data
+            const animationData = PIXI.Assets.cache.get(jsonPaths[0])?.data.animations;
 
-                // For animated entities, the first JSON file is animation data
-                const animationData = PIXI.Assets.cache.get(jsonPaths[0]).data.animations;
+            // If there was animation data in that first JSON file, this entity is animated
+            if (animationData) {
 
                 for (let i = 0; i < Object.keys(animationData).length; i++) {
 
@@ -61,11 +62,7 @@ export default class Entity extends PIXI.Sprite {
 
                     this.animations.push(animation);
                 }
-                PlainsOfShinar.app.stage.addChild(this);
-
                 this.setAnimation(animation);
-
-                PlainsOfShinar.entities.push(this);
             }
             else {
 
@@ -74,15 +71,16 @@ export default class Entity extends PIXI.Sprite {
                 this.body = PIXI.Sprite.from(this.label + '_default_90_000');
                 this.shadow = PIXI.Sprite.from('shadow_' + this.label + '_default_90_000');
 
+                this.setShadow();
+
                 this.body.label = 'default';
                 this.body.updateAnchor = true;
                 this.body.interactive = false;
 
                 PlainsOfShinar.app.stage.addChild(this.body);
                 PlainsOfShinar.app.stage.addChild(this.shadow);
-
-                PlainsOfShinar.entities.push(this);
             }
+            PlainsOfShinar.entities.push(this);
         })();
     }
     setAnimation = (animation, playFromBeginning = true) => {
@@ -115,14 +113,20 @@ export default class Entity extends PIXI.Sprite {
 
         this.shadow = this.animations.find(a => a.label === 'shadow_' + animation);
 
-        // add the body and its shadow to the stage and set all necessary properties
-        PlainsOfShinar.app.stage.addChild(this.body);
-        PlainsOfShinar.app.stage.addChild(this.shadow);
+        this.setShadow();
 
         this.body.currentFrame = startFrame;
         this.body.animationSpeed = .5;
 
         this.body.play();
+
+        PlainsOfShinar.app.stage.addChild(this.body);
+        PlainsOfShinar.app.stage.addChild(this.shadow);
+    }
+    static blurFilter = new PIXI.BlurFilter(5);
+    setShadow = () => {
+        this.shadow.alpha = 0.5;
+        this.shadow.filters = [Entity.blurFilter];
     }
     /**
      * Keeps bodies, shadows, and (soon) gear in sync with their entities.
@@ -192,7 +196,7 @@ export default class Entity extends PIXI.Sprite {
 
                         // TODO: this is still firing when one entity 'grinds' into another;
                         // i.e. the entity is not moving but the engine thinks it is repeatedly colliding
-                        console.log(this.label + ' collided with entity:', entity.label);
+                        // console.log(this.label + ' collided with entity:', entity.label);
 
                         this.isMoving = false;
                         this.targetPosition = this.position;

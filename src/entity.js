@@ -15,7 +15,7 @@ export default class Entity extends PIXI.Sprite {
         this.shadow = null; // stores the current shadow
         this.label = name;
         this.width = size;
-        this.height = this.width / 2;
+        this.height = this.width / PlainsOfShinar.isometry;
         this.position.set(x, y);
         this.set = set;
 

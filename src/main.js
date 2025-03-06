@@ -21,24 +21,38 @@ import Player from './player.js';
 
     document.body.appendChild(PlainsOfShinar.app.canvas);
 
-    await PlainsOfShinar.loadAsset('background.png');
-
     await PlainsOfShinar.loadAsset('spritesheets/manifest.json');
 
     PlainsOfShinar.manifest = PIXI.Assets.cache.get('spritesheets/manifest.json');
+
+    await PlainsOfShinar.loadAsset('background.png');
 
     const background = new PIXI.TilingSprite({
         texture: PIXI.Texture.from('background.png'),
         width: PlainsOfShinar.app.canvas.width,
         height: PlainsOfShinar.app.canvas.height
     });
+
+    /** Not the same as the isometric diamond used for entities. */
+    const isometricDiamond = [
+        background.width / 2, 0,
+        background.width, background.height / 2,
+        background.width / 2, background.height,
+        0, background.height / 2
+    ];
+    background.mask = new PIXI.Graphics().poly(isometricDiamond).fill({ color: 0xffffff });
     background.tileScale.y = .5;
     background.tileTransform.rotation = .5;
     PlainsOfShinar.app.stage.addChild(background);
 
-    const gridSize = 64;
+    const cellSize = 32;
+    const gridSize = masterWidth / cellSize;
+    const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
 
-    for (let i = gridSize; i <= masterWidth * PlainsOfShinar.isometry; i += gridSize) {
+    // Generate a visualization of the grid.
+    // Some of these lines are longer than they need to be,
+    // but it's not worth the extra dozen lines of code to shorten them.
+    for (let i = cellSize; i <= masterWidth * PlainsOfShinar.isometry; i += cellSize) {
 
         const line = new PIXI.Graphics();
         const line2 = new PIXI.Graphics();
@@ -60,9 +74,7 @@ import Player from './player.js';
     }
 
     const player = new Player();
-
     const barrel = new Entity('tutorial', 'barrel', 'default', 200, 300, 600);
-
     const barrel2 = new Entity('tutorial', 'barrel', 'default', 200, 600, 600);
 
     let PointerIsDown = false;

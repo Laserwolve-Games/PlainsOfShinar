@@ -12,10 +12,14 @@ PlainsOfShinar.loadAsset = async (asset) => {
 }
 PlainsOfShinar.lerp = (a, b, x) => a + x * (b - a);
 
-PlainsOfShinar.isometrify = (value, angle) => value * PlainsOfShinar.lerp(.5, 1, Math.abs(Math.abs(angle) - 90) / 90);
+PlainsOfShinar.isometry = .5;
 
-// We'd use Math.sqrt(2) if the daz camera was at -45 degrees
-PlainsOfShinar.isometry = 2;
+PlainsOfShinar.isometrify = (value, angle) => {
+
+    if (angle) return value * PlainsOfShinar.lerp(PlainsOfShinar.isometry, 1, Math.abs(Math.abs(angle) - 90) / 90);
+     
+    else return value * PlainsOfShinar.isometry;
+}
 
 PlainsOfShinar.collisionCheck = (poly1, poly2) => {
     const projectPolygon = (axis, polygon) => {

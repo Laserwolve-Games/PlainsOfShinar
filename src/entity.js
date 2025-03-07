@@ -15,15 +15,15 @@ export default class Entity extends PIXI.Sprite {
         this.shadow = null; // stores the current shadow
         this.label = name;
         this.width = size;
-        this.height = this.width / PlainsOfShinar.isometry;
+        this.height = PlainsOfShinar.isometrify(this.width);
         this.position.set(x, y);
         this.set = set;
 
         const isometricDiamond = [
-            0, -this.height / 2,
-            this.width / 2, 0,
-            0, this.height / 2,
-            -this.width / 2, 0
+            0,  PlainsOfShinar.isometrify(-this.height),
+            PlainsOfShinar.isometrify(this.width), 0,
+            0, PlainsOfShinar.isometrify(this.height),
+            PlainsOfShinar.isometrify(-this.width), 0
         ];
         const randomColor = Math.floor(Math.random() * 16777215);
         const graphic = new PIXI.Graphics().poly(isometricDiamond).fill(randomColor);
@@ -135,10 +135,10 @@ export default class Entity extends PIXI.Sprite {
     sync = () => {
 
         this.collisionBox = [
-            this.position.x, this.position.y - this.height / 2,
-            this.position.x + this.width / 2, this.position.y,
-            this.position.x, this.position.y + this.height / 2,
-            this.position.x - this.width / 2, this.position.y
+            this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
+            this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
+            this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
+            this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y
         ];
 
         this.body.position.set(this.position.x, this.position.y);
@@ -183,10 +183,10 @@ export default class Entity extends PIXI.Sprite {
                 const nextY = this.position.y + (dy / distance) * this.actualSpeed;
 
                 const nextCollisionBox = [
-                    nextX, nextY - this.height / 2,
-                    nextX + this.width / 2, nextY,
-                    nextX, nextY + this.height / 2,
-                    nextX - this.width / 2, nextY
+                    nextX, nextY - PlainsOfShinar.isometrify(this.height),
+                    nextX + PlainsOfShinar.isometrify(this.width), nextY,
+                    nextX, nextY + PlainsOfShinar.isometrify(this.height),
+                    nextX - PlainsOfShinar.isometrify(this.width), nextY
                 ];
 
                 for (const entity of PlainsOfShinar.entities) {

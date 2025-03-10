@@ -153,6 +153,13 @@ export default class Entity extends PIXI.Sprite {
     moveTo = (x, y) => {
 
         this.targetPosition = { x, y };
+
+        // this.targetCell = {
+        //     x: Math.round(this.targetPosition.x / PlainsOfShinar.cellSize),
+        //     y: Math.round(this.targetPosition.y / PlainsOfShinar.cellSize)
+        // };
+
+        console.log('Target cell:', this.targetCell);
     }
     calculateFacing = (x1, y1, x2, y2) => {
 
@@ -173,6 +180,8 @@ export default class Entity extends PIXI.Sprite {
     handleMovement = () => {
 
         if (this.targetPosition !== this.position) {
+
+
 
             const dx = this.targetPosition.x - this.position.x;
             const dy = this.targetPosition.y - this.position.y;
@@ -257,16 +266,7 @@ export default class Entity extends PIXI.Sprite {
      */
     setLocation = (gridX, gridY) => {
         
-        // subtract 1 to make it zero based
-        gridX -= 1;
-        gridY -= 1;
-
-        this.position.set(
-            
-            gridX * PlainsOfShinar.cellSize + PlainsOfShinar.cellSize + gridY * PlainsOfShinar.cellSize,
-
-            PlainsOfShinar.isometrify(PlainsOfShinar.masterHeight)
-            - gridX * PlainsOfShinar.isometrify(PlainsOfShinar.cellSize) + gridY * PlainsOfShinar.isometrify(PlainsOfShinar.cellSize)  
-        );
+        const { x, y } = PlainsOfShinar.getLocationFromCell(gridX, gridY);
+        this.position.set(x, y);
     }
 }

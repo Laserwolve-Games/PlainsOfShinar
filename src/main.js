@@ -8,13 +8,13 @@ import Player from './player.js';
 (async () => {
 
     await PlainsOfShinar.app.init({
-        width: PlainsOfShinar.masterWidth, height: PlainsOfShinar.masterHeight,
+        width: PlainsOfShinar.layoutWidth, height: PlainsOfShinar.layoutHeight,
 
         preference: 'webgpu'
     });
 
-    PlainsOfShinar.app.canvas.style.width = PlainsOfShinar.masterWidth + 'px';
-    PlainsOfShinar.app.canvas.style.height = PlainsOfShinar.masterHeight + 'px';
+    PlainsOfShinar.app.canvas.style.width = PlainsOfShinar.layoutWidth + 'px';
+    PlainsOfShinar.app.canvas.style.height = PlainsOfShinar.layoutHeight + 'px';
 
     document.body.appendChild(PlainsOfShinar.app.canvas);
 
@@ -43,12 +43,12 @@ import Player from './player.js';
     background.tileTransform.rotation = PlainsOfShinar.isometry;
     PlainsOfShinar.app.stage.addChild(background);
 
-    const gridSize = PlainsOfShinar.masterWidth / PlainsOfShinar.cellSize;
+    const gridSize = PlainsOfShinar.layoutWidth / PlainsOfShinar.cellWidth;
     console.log('Generating ' + gridSize + 'x' + gridSize + ' grid...');
     PlainsOfShinar.grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
 
     // Generate a visualization of the grid.
-    for (let i = 0; i <= PlainsOfShinar.masterHeight; i += PlainsOfShinar.cellSize) {
+    for (let i = 0; i <= PlainsOfShinar.layoutHeight; i += PlainsOfShinar.cellWidth) {
 
         /** Starts in the upper left and terminates in the bottom right. */
         const verticalLine = new PIXI.Graphics();
@@ -56,16 +56,16 @@ import Player from './player.js';
         const HorizontalLine = new PIXI.Graphics();
         const stroke = { width: 1, color: 0xFF0000 };
         const adjustedI= PlainsOfShinar.isometrify(i);
-        const adjustedMasterHeight = PlainsOfShinar.isometrify(PlainsOfShinar.masterHeight);
+        const adjustedMasterHeight = PlainsOfShinar.isometrify(PlainsOfShinar.layoutHeight);
 
         PlainsOfShinar.app.stage.addChild(verticalLine);
         PlainsOfShinar.app.stage.addChild(HorizontalLine);
 
-        verticalLine.moveTo(PlainsOfShinar.masterHeight - i, adjustedI);
+        verticalLine.moveTo(PlainsOfShinar.layoutHeight - i, adjustedI);
 
-        verticalLine.lineTo(PlainsOfShinar.masterWidth - i, adjustedMasterHeight + adjustedI);
+        verticalLine.lineTo(PlainsOfShinar.layoutWidth - i, adjustedMasterHeight + adjustedI);
 
-        HorizontalLine.moveTo(PlainsOfShinar.masterHeight + i, adjustedI);
+        HorizontalLine.moveTo(PlainsOfShinar.layoutHeight + i, adjustedI);
 
         HorizontalLine.lineTo(i, adjustedMasterHeight + adjustedI);
 

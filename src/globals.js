@@ -22,16 +22,17 @@ PlainsOfShinar.isometrify = (value, angle) => {
 
     if (angle) return value * PlainsOfShinar.lerp(PlainsOfShinar.isometry, 1, Math.abs(Math.abs(angle) - 90) / 90);
      
-    // There's a chance this is being used in places where I really should just be
-    // dividing by 2, and it has nothing to do with isometry.
+    // There's a chance this is being used in places that have nothing to do with isometry,
+    // and I really should just be dividing by 2.
     else return value * PlainsOfShinar.isometry;
 }
 
 // Isometric angles: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/8
 PlainsOfShinar.isometry = .5;
-PlainsOfShinar.cellSize = 64;
-PlainsOfShinar.masterWidth = 4096;
-PlainsOfShinar.masterHeight = PlainsOfShinar.isometrify(PlainsOfShinar.masterWidth);
+PlainsOfShinar.cellWidth = 64;
+PlainsOfShinar.cellHeight = PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth);
+PlainsOfShinar.layoutWidth = 4096;
+PlainsOfShinar.layoutHeight = PlainsOfShinar.isometrify(PlainsOfShinar.layoutWidth);
 
 PlainsOfShinar.collisionCheck = (poly1, poly2) => {
     const projectPolygon = (axis, polygon) => {
@@ -68,5 +69,27 @@ PlainsOfShinar.collisionCheck = (poly1, poly2) => {
     }
 
     return true;
+}
+PlainsOfShinar.getCellFromLocation = (x, y) => {
+
+    x = Math.round(x / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth;
+    y = Math.round(y / PlainsOfShinar.cellHeight) * PlainsOfShinar.cellHeight;
+
+    let gridX = Math.round((x - PlainsOfShinar.cellWidth) / (2 * PlainsOfShinar.cellWidth));
+    let gridY = Math.round((y - PlainsOfShinar.isometrify(PlainsOfShinar.layoutHeight) + gridX * PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth)) / PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth));
+
+    return {gridX, gridY};
+}
+PlainsOfShinar.getLocationFromCell = (gridX, gridY) => {
+
+    // subtract 1 to make it zero based
+    gridX -= 1;
+    gridY -= 1;
+
+    let x = gridX * PlainsOfShinar.cellWidth + PlainsOfShinar.cellWidth + gridY * PlainsOfShinar.cellWidth;
+    let y = PlainsOfShinar.isometrify(PlainsOfShinar.layoutHeight)
+    - gridX * PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth) + gridY * PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth);
+
+    return {x, y};
 }
 export default PlainsOfShinar;

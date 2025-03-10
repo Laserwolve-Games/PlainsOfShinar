@@ -16,8 +16,12 @@ export default class Entity extends PIXI.Sprite {
         this.label = name;
         this.width = size;
         this.height = PlainsOfShinar.isometrify(this.width);
-        this.position.set(x, y);
+        this.setLocation(x, y);
         this.set = set;
+
+        PlainsOfShinar.grid[x][y] = 1;
+
+        console.log(PlainsOfShinar.grid);
 
         const isometricDiamond = [
             0,  PlainsOfShinar.isometrify(-this.height),
@@ -245,5 +249,24 @@ export default class Entity extends PIXI.Sprite {
             entity.body.zIndex = 1 + index * 2;
             entity.shadow.zIndex = 1 + index * 2 - 1;
         });
+    }
+    /** Sets the entity's location to exact grid coordinates.
+     * @author Andrew Rogers
+     * @param {*} gridX The X coordinate of the grid cell.
+     * @param {*} gridY The Y coordinate of the grid cell.
+     */
+    setLocation = (gridX, gridY) => {
+        
+        // subtract 1 to make it zero based
+        gridX -= 1;
+        gridY -= 1;
+
+        this.position.set(
+            
+            gridX * PlainsOfShinar.cellSize + PlainsOfShinar.cellSize + gridY * PlainsOfShinar.cellSize,
+
+            PlainsOfShinar.isometrify(PlainsOfShinar.masterHeight)
+            - gridX * PlainsOfShinar.isometrify(PlainsOfShinar.cellSize) + gridY * PlainsOfShinar.isometrify(PlainsOfShinar.cellSize)  
+        );
     }
 }

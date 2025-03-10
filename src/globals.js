@@ -12,14 +12,26 @@ PlainsOfShinar.loadAsset = async (asset) => {
 }
 PlainsOfShinar.lerp = (a, b, x) => a + x * (b - a);
 
-PlainsOfShinar.isometry = .5;
-
+/** Reduces a number by the appropriate amount to appear isometric.
+ * @author Andrew Rogers
+ * @param {number} value - The number to be reduced.
+ * @param {number} angle - Optional: the angle to use in the isometric calculation.
+ * @returns {number} The isometrically-corrected number.
+ */
 PlainsOfShinar.isometrify = (value, angle) => {
 
     if (angle) return value * PlainsOfShinar.lerp(PlainsOfShinar.isometry, 1, Math.abs(Math.abs(angle) - 90) / 90);
      
+    // There's a chance this is being used in places where I really should just be
+    // dividing by 2, and it has nothing to do with isometry.
     else return value * PlainsOfShinar.isometry;
 }
+
+// Isometric angles: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/8
+PlainsOfShinar.isometry = .5;
+PlainsOfShinar.cellSize = 64;
+PlainsOfShinar.masterWidth = 4096;
+PlainsOfShinar.masterHeight = PlainsOfShinar.isometrify(PlainsOfShinar.masterWidth);
 
 PlainsOfShinar.collisionCheck = (poly1, poly2) => {
     const projectPolygon = (axis, polygon) => {

@@ -7,17 +7,14 @@ import Player from './player.js';
 
 (async () => {
 
-    const masterWidth = 4096;
-    const masterHeight = PlainsOfShinar.isometrify(masterWidth);
-
     await PlainsOfShinar.app.init({
-        width: masterWidth, height: masterHeight,
+        width: PlainsOfShinar.masterWidth, height: PlainsOfShinar.masterHeight,
 
         preference: 'webgpu'
     });
 
-    PlainsOfShinar.app.canvas.style.width = masterWidth + 'px';
-    PlainsOfShinar.app.canvas.style.height = masterHeight + 'px';
+    PlainsOfShinar.app.canvas.style.width = PlainsOfShinar.masterWidth + 'px';
+    PlainsOfShinar.app.canvas.style.height = PlainsOfShinar.masterHeight + 'px';
 
     document.body.appendChild(PlainsOfShinar.app.canvas);
 
@@ -40,18 +37,18 @@ import Player from './player.js';
         PlainsOfShinar.isometrify(background.width), background.height,
         0, PlainsOfShinar.isometrify(background.height)
     ];
-    
+
     background.mask = new PIXI.Graphics().poly(isometricDiamond).fill({ color: 0xffffff });
     background.tileScale.y = PlainsOfShinar.isometry;
     background.tileTransform.rotation = PlainsOfShinar.isometry;
     PlainsOfShinar.app.stage.addChild(background);
 
-    const cellSize = 32;
-    const gridSize = masterWidth / cellSize;
-    const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+    const gridSize = PlainsOfShinar.masterWidth / PlainsOfShinar.cellSize;
+    console.log('Generating ' + gridSize + 'x' + gridSize + ' grid...');
+    PlainsOfShinar.grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
 
     // Generate a visualization of the grid.
-    for (let i = 0; i <= masterHeight; i += cellSize) {
+    for (let i = 0; i <= PlainsOfShinar.masterHeight; i += PlainsOfShinar.cellSize) {
 
         /** Starts in the upper left and terminates in the bottom right. */
         const verticalLine = new PIXI.Graphics();
@@ -59,16 +56,16 @@ import Player from './player.js';
         const HorizontalLine = new PIXI.Graphics();
         const stroke = { width: 1, color: 0xFF0000 };
         const adjustedI= PlainsOfShinar.isometrify(i);
-        const adjustedMasterHeight = PlainsOfShinar.isometrify(masterHeight);
+        const adjustedMasterHeight = PlainsOfShinar.isometrify(PlainsOfShinar.masterHeight);
 
         PlainsOfShinar.app.stage.addChild(verticalLine);
         PlainsOfShinar.app.stage.addChild(HorizontalLine);
 
-        verticalLine.moveTo(masterHeight - i, adjustedI);
+        verticalLine.moveTo(PlainsOfShinar.masterHeight - i, adjustedI);
 
-        verticalLine.lineTo(masterWidth - i, adjustedMasterHeight + adjustedI);
+        verticalLine.lineTo(PlainsOfShinar.masterWidth - i, adjustedMasterHeight + adjustedI);
 
-        HorizontalLine.moveTo(masterHeight + i, adjustedI);
+        HorizontalLine.moveTo(PlainsOfShinar.masterHeight + i, adjustedI);
 
         HorizontalLine.lineTo(i, adjustedMasterHeight + adjustedI);
 
@@ -77,8 +74,8 @@ import Player from './player.js';
     }
 
     const player = new Player();
-    const barrel = new Entity('tutorial', 'barrel', 'default', 200, 300, 600);
-    const barrel2 = new Entity('tutorial', 'barrel', 'default', 200, 600, 600);
+    const barrel = new Entity('tutorial', 'barrel', 'default', 128, 14, 14);
+    const barrel2 = new Entity('tutorial', 'barrel', 'default', 128, 18, 18);
 
     let PointerIsDown = false;
     let mouseX = 0;

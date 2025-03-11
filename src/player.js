@@ -4,7 +4,7 @@ export default class Player extends Entity {
 
     constructor() {
 
-        super('man', 'man', 'idle', 128, 16, 16);
+        super('man', 'man', 'idle', 128, 0, 0);
 
         this.speed = 5;
     }

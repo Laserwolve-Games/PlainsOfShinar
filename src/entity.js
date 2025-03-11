@@ -155,7 +155,7 @@ export default class Entity extends PIXI.Sprite {
 
         console.log('center of cell clicked: ' + targetX + ', ' + targetY);
 
-        const { x: gridX, y: gridY } = PlainsOfShinar.getCellFromLocation(targetX, targetY);
+        const { x: gridX, y: gridY } = PlainsOfShinar.getCellFromLocation(x, y);
 
         console.log('coordinates of cell clicked: ' + gridX + ', ' + gridY);
 

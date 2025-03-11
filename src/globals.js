@@ -99,16 +99,12 @@ PlainsOfShinar.getCellFromLocation = (x, y) => {
     // Warning: ugly math that I do not understand
     // Might break if we change cell or layout sizes
     const gridX = Math.floor(cartX / PlainsOfShinar.cellWidth) - 16;
-    const gridY = Math.floor(cartY / PlainsOfShinar.cellWidth) - 17;
+    const gridY = Math.round(cartY / PlainsOfShinar.cellWidth) - 16;
 
-    return { x: gridX + 1, y: Math.abs(gridY + 1) };
+    return { x: gridX, y: Math.abs(gridY) };
     
 }
 PlainsOfShinar.getLocationFromCell = (gridX, gridY) => {
-
-    // subtract 1 to make it zero based
-    gridX -= 1;
-    gridY -= 1;
 
     let x = gridX * PlainsOfShinar.cellWidth + PlainsOfShinar.cellWidth + gridY * PlainsOfShinar.cellWidth;
     let y = PlainsOfShinar.isometrify(PlainsOfShinar.layoutHeight)

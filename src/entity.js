@@ -21,8 +21,6 @@ export default class Entity extends PIXI.Sprite {
 
         PlainsOfShinar.grid[x][y] = 1;
 
-        // console.log(PlainsOfShinar.grid);
-
         const isometricDiamond = [
             0,  PlainsOfShinar.isometrify(-this.height),
             PlainsOfShinar.isometrify(this.width), 0,
@@ -153,15 +151,16 @@ export default class Entity extends PIXI.Sprite {
     }
     moveTo = (x, y) => {
 
-        const { cartX, cartY } = PlainsOfShinar.isometricToCartesian(x, y);
+        const { x: targetX, y: targetY } = PlainsOfShinar.roundLocationToCenterOfCell(x, y);
 
-        const roundedCartX = Math.floor(cartX / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth + PlainsOfShinar.cellHeight;
-        const roundedCartY = Math.floor(cartY / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth + PlainsOfShinar.cellHeight;
+        console.log('center of cell clicked: ' + targetX + ', ' + targetY);
 
-        const { x: roundedX, y: roundedY } = PlainsOfShinar.CartesianToIsometric(roundedCartX, roundedCartY);
+        const { x: gridX, y: gridY } = PlainsOfShinar.getCellFromLocation(targetX, targetY);
 
-        this.targetPositionX = roundedX;
-        this.targetPositionY = roundedY;
+        console.log('coordinates of cell clicked: ' + gridX + ', ' + gridY);
+
+        this.targetPositionX = x;
+        this.targetPositionY = y;
     }
     calculateFacing = (x1, y1, x2, y2) => {
 

@@ -81,12 +81,28 @@ PlainsOfShinar.CartesianToIsometric = (cartX, cartY) => {
     const y = (cartX + cartY) / 2;
     return { x, y };
 }
+PlainsOfShinar.roundLocationToCenterOfCell = (x, y) => {
+
+    const { cartX, cartY } = PlainsOfShinar.isometricToCartesian(x, y);
+
+    const roundedCartX = Math.floor(cartX / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth + PlainsOfShinar.cellHeight;
+    const roundedCartY = Math.floor(cartY / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth + PlainsOfShinar.cellHeight;
+
+    return PlainsOfShinar.CartesianToIsometric(roundedCartX, roundedCartY);
+}
 PlainsOfShinar.getCellFromLocation = (x, y) => {
 
-    let gridX;
-    let gridY;
+    const { x: targetX, y: targetY } = PlainsOfShinar.roundLocationToCenterOfCell(x, y);
+    
+    const { cartX, cartY } = PlainsOfShinar.isometricToCartesian(targetX, targetY);
 
-    return {gridX, gridY};
+    // Warning: ugly math that I do not understand
+    // Might break if we change cell or layout sizes
+    const gridX = Math.floor(cartX / PlainsOfShinar.cellWidth) - 16;
+    const gridY = Math.floor(cartY / PlainsOfShinar.cellWidth) - 17;
+
+    return { x: gridX + 1, y: Math.abs(gridY + 1) };
+    
 }
 PlainsOfShinar.getLocationFromCell = (gridX, gridY) => {
 

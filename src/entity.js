@@ -36,7 +36,8 @@ export default class Entity extends PIXI.Sprite {
         this.texture = PlainsOfShinar.app.renderer.generateTexture(graphic, 'nearest', 1);
         this.facing = initialFacing;
         this.actualFacing = initialFacing;
-        this.targetPosition = this.position;
+        this.targetPositionX = this.position.x;
+        this.targetPositionY = this.position.y;
         this.speed = 0;
         this.anchor.set(.5);
 
@@ -152,14 +153,9 @@ export default class Entity extends PIXI.Sprite {
     }
     moveTo = (x, y) => {
 
-        this.targetPosition = { x, y };
+        this.targetPositionX = x;
+        this.targetPositionY = y;
 
-        // this.targetCell = {
-        //     x: Math.round(this.targetPosition.x / PlainsOfShinar.cellSize),
-        //     y: Math.round(this.targetPosition.y / PlainsOfShinar.cellSize)
-        // };
-
-        // console.log('Target cell:', this.targetCell);
     }
     calculateFacing = (x1, y1, x2, y2) => {
 
@@ -179,10 +175,12 @@ export default class Entity extends PIXI.Sprite {
     }
     handleMovement = () => {
 
-        if (this.targetPosition != this.position) {
+        if (this.position.x != this.targetPositionX || this.position.y != this.targetPositionY) {
 
-            const dx = this.targetPosition.x - this.position.x;
-            const dy = this.targetPosition.y - this.position.y;
+            console.log('im running');
+
+            const dx = this.targetPositionX - this.position.x;
+            const dy = this.targetPositionY - this.position.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance) {
@@ -212,29 +210,25 @@ export default class Entity extends PIXI.Sprite {
                         // console.log(this.label + ' collided with entity:', entity.label);
 
                         this.isMoving = false;
-                        this.targetPosition = this.position;
                         return;
                     }
                 }
 
-                this.isMoving = true;
-
                 this.position.x = nextX;
                 this.position.y = nextY;
 
-            } else {
+                if (this.position.x == this.targetPositionX && this.position.y == this.targetPositionY)
 
-                this.isMoving = false;
-
-                this.targetPosition = this.position;
-            }
+                    this.isMoving = false;
+                 else this.isMoving = true;
+            } 
         }
     }
     handleMovementAnimations = () => {
 
         if (this.isMoving) {
 
-            this.calculateFacing(this.position.x, this.position.y, this.targetPosition.x, this.targetPosition.y);
+            this.calculateFacing(this.position.x, this.position.y, this.targetPositionX, this.targetPositionY);
 
             // If the entity already was walking, play from the current frame...
             if (this.body.label.includes('walk')) this.setAnimation('walk', false);

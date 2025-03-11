@@ -70,13 +70,21 @@ PlainsOfShinar.collisionCheck = (poly1, poly2) => {
 
     return true;
 }
+PlainsOfShinar.isometricToCartesian = (x, y) => {
+    const cartX = (2 * y + x) / 2;
+    const cartY = (2 * y - x) / 2;
+    return { cartX, cartY };
+}
+
+PlainsOfShinar.CartesianToIsometric = (cartX, cartY) => {
+    const x = cartX - cartY;
+    const y = (cartX + cartY) / 2;
+    return { x, y };
+}
 PlainsOfShinar.getCellFromLocation = (x, y) => {
 
-    x = Math.round(x / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth;
-    y = Math.round(y / PlainsOfShinar.cellHeight) * PlainsOfShinar.cellHeight;
-
-    let gridX = Math.round((x - PlainsOfShinar.cellWidth) / (2 * PlainsOfShinar.cellWidth));
-    let gridY = Math.round((y - PlainsOfShinar.isometrify(PlainsOfShinar.layoutHeight) + gridX * PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth)) / PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth));
+    let gridX;
+    let gridY;
 
     return {gridX, gridY};
 }
@@ -92,4 +100,5 @@ PlainsOfShinar.getLocationFromCell = (gridX, gridY) => {
 
     return {x, y};
 }
+
 export default PlainsOfShinar;

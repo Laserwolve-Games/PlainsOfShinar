@@ -153,9 +153,15 @@ export default class Entity extends PIXI.Sprite {
     }
     moveTo = (x, y) => {
 
-        this.targetPositionX = x;
-        this.targetPositionY = y;
+        const { cartX, cartY } = PlainsOfShinar.isometricToCartesian(x, y);
 
+        const roundedCartX = Math.floor(cartX / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth + PlainsOfShinar.cellHeight;
+        const roundedCartY = Math.floor(cartY / PlainsOfShinar.cellWidth) * PlainsOfShinar.cellWidth + PlainsOfShinar.cellHeight;
+
+        const { x: roundedX, y: roundedY } = PlainsOfShinar.CartesianToIsometric(roundedCartX, roundedCartY);
+
+        this.targetPositionX = roundedX;
+        this.targetPositionY = roundedY;
     }
     calculateFacing = (x1, y1, x2, y2) => {
 
@@ -176,8 +182,6 @@ export default class Entity extends PIXI.Sprite {
     handleMovement = () => {
 
         if (this.position.x != this.targetPositionX || this.position.y != this.targetPositionY) {
-
-            console.log('im running');
 
             const dx = this.targetPositionX - this.position.x;
             const dy = this.targetPositionY - this.position.y;

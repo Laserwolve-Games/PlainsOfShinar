@@ -21,7 +21,7 @@ export default class Entity extends PIXI.Sprite {
 
         PlainsOfShinar.grid[x][y] = 1;
 
-        console.log(PlainsOfShinar.grid);
+        // console.log(PlainsOfShinar.grid);
 
         const isometricDiamond = [
             0,  PlainsOfShinar.isometrify(-this.height),
@@ -159,7 +159,7 @@ export default class Entity extends PIXI.Sprite {
         //     y: Math.round(this.targetPosition.y / PlainsOfShinar.cellSize)
         // };
 
-        console.log('Target cell:', this.targetCell);
+        // console.log('Target cell:', this.targetCell);
     }
     calculateFacing = (x1, y1, x2, y2) => {
 
@@ -179,21 +179,21 @@ export default class Entity extends PIXI.Sprite {
     }
     handleMovement = () => {
 
-        if (this.targetPosition !== this.position) {
-
-
+        if (this.targetPosition != this.position) {
 
             const dx = this.targetPosition.x - this.position.x;
             const dy = this.targetPosition.y - this.position.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            this.actualSpeed = PlainsOfShinar.isometrify(this.speed, this.actualFacing);
+            if (distance) {
 
-            if (distance > this.actualSpeed) {
+                this.actualSpeed = PlainsOfShinar.isometrify(this.speed, this.actualFacing);
+
+                const moveDistance = Math.min(distance, this.actualSpeed);
 
                 // Collision system: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/4
-                const nextX = this.position.x + (dx / distance) * this.actualSpeed;
-                const nextY = this.position.y + (dy / distance) * this.actualSpeed;
+                const nextX = this.position.x + (dx / distance) * moveDistance;
+                const nextY = this.position.y + (dy / distance) * moveDistance;
 
                 const nextCollisionBox = [
                     nextX, nextY - PlainsOfShinar.isometrify(this.height),
@@ -229,7 +229,6 @@ export default class Entity extends PIXI.Sprite {
                 this.targetPosition = this.position;
             }
         }
-
     }
     handleMovementAnimations = () => {
 

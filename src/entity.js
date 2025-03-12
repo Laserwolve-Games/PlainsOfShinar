@@ -3,6 +3,10 @@ import PlainsOfShinar from './globals.js';
 
 // Can't extend PIXI.Container: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/3
 // Can't extend PIXI.Graphics because we need this.anchor
+
+// TODO: Turn this into a pool of workers
+const worker = new Worker('pathfindingWorker.js');
+
 export default class Entity extends PIXI.Sprite {
 
     constructor(set, name, animation, size, x, y, initialFacing = 0) {
@@ -17,6 +21,7 @@ export default class Entity extends PIXI.Sprite {
         this.width = size;
         this.height = PlainsOfShinar.isometrify(this.width);
         this.setLocation(x, y);
+        this.currentCell = { x, y };
         this.set = set;
 
         PlainsOfShinar.grid[x][y] = 1;
@@ -151,16 +156,25 @@ export default class Entity extends PIXI.Sprite {
     }
     moveTo = (x, y) => {
 
-        const { x: targetX, y: targetY } = PlainsOfShinar.roundLocationToCenterOfCell(x, y);
+        // Only continue if the target position is new
+        if (this.targetPositionX != x || this.targetPositionY != y) {
 
-        console.log('center of cell clicked: ' + targetX + ', ' + targetY);
+            this.targetPositionX = x;
+            this.targetPositionY = y;
 
-        const { x: gridX, y: gridY } = PlainsOfShinar.getCellFromLocation(x, y);
+            this.targetCell = PlainsOfShinar.getCellFromLocation(x, y);
 
-        console.log('coordinates of cell clicked: ' + gridX + ', ' + gridY);
+            // Find a path to the target cell in a web worker
+            worker.postMessage({
+            grid: PlainsOfShinar.grid,
+            start: this.currentCell,
+            end: this.targetCell
+            });
 
-        this.targetPositionX = x;
-        this.targetPositionY = y;
+            worker.onmessage = (event) => this.path = event.data.path;
+
+            console.log(this.label + ' path:', this.path);
+        }
     }
     calculateFacing = (x1, y1, x2, y2) => {
 

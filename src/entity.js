@@ -154,6 +154,44 @@ export default class Entity extends PIXI.Sprite {
 
         this.shadow.currentFrame = this.body.currentFrame;
     }
+    /** Check wether or not the entity can get to the target location without pathfinding;
+     * i.e. if there are no other static entities in the way.
+     * 
+     * TODO: Explain how the lines work here
+     * @author  Andrew Rogers
+     * @returns {boolean} Whether or not pathfinding is needed.
+     */
+    isPathfindingNeeded = () => {
+
+        const westLine = [
+            this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
+            this.targetPositionX - PlainsOfShinar.isometrify(this.width), this.targetPositionY
+        ];
+        const eastLine = [
+            this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
+            this.targetPositionX + PlainsOfShinar.isometrify(this.width), this.targetPositionY
+        ];
+        const northLine = [
+            this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
+            this.targetPositionX, this.targetPositionY - PlainsOfShinar.isometrify(this.height)
+        ];
+        const southLine = [
+            this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
+            this.targetPositionX, this.targetPositionY + PlainsOfShinar.isometrify(this.height)
+        ];
+
+        // TODO: We don't need to loop over all 4 lines.
+        // Just east and west OR north and south,
+        // Depending on the angle between the entity and the target location.
+        for (const line of [westLine, eastLine, northLine, southLine]) 
+
+            // TODO: Again, also don't need to loop over everything, probably
+            for (const entity of PlainsOfShinar.entities) 
+
+                if (entity !== this && PlainsOfShinar.collisionCheck(line, entity.collisionBox)) return true;
+        
+        return false;
+    }
     moveTo = (x, y) => {
 
         // Only continue if the target position is new
@@ -161,6 +199,8 @@ export default class Entity extends PIXI.Sprite {
 
             this.targetPositionX = x;
             this.targetPositionY = y;
+
+            console.log('is pathfinding needed?', this.isPathfindingNeeded());
 
             this.targetCell = PlainsOfShinar.getCellFromLocation(x, y);
 

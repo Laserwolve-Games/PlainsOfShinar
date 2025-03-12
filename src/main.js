@@ -83,16 +83,25 @@ import Player from './player.js';
 
     // Not possible to get mouse position outside of an event:
     // https://github.com/Laserwolve-Games/PlainsOfShinar/issues/6
-    PlainsOfShinar.app.canvas.addEventListener('pointermove', (event) => updateMousePosition(event));
+    PlainsOfShinar.app.canvas.addEventListener('pointermove', (event) => {
+
+        updateMousePosition(event);
+
+        if(PointerIsDown) player.moveTo(mouseX, mouseY);
+    });
 
     PlainsOfShinar.app.canvas.addEventListener('pointerdown', (event) => {
 
         updateMousePosition(event);
+
         PointerIsDown = true;
+
+        player.moveTo(mouseX, mouseY);
     });
     PlainsOfShinar.app.canvas.addEventListener('pointerup', (event) => {
 
         updateMousePosition(event);
+
         PointerIsDown = false;
     });
 

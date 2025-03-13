@@ -10,7 +10,7 @@ export default class Entity extends PIXI.Sprite {
     static worker = new Worker('pathfindingWorker.js');
     static blurFilter = new PIXI.BlurFilter(5);
 
-    constructor(set, name, animation, size, x, y, initialFacing = 0) {
+    constructor(set, name, animation, size, x, y, isStatic, initialFacing = 0) {
 
         super();
 
@@ -25,7 +25,7 @@ export default class Entity extends PIXI.Sprite {
         this.currentCell = { x, y };
         this.set = set;
 
-        PlainsOfShinar.grid[x][y] = 1;
+        if (isStatic) PlainsOfShinar.grid[x][y] = 1;
 
         const isometricDiamond = [
             0, PlainsOfShinar.isometrify(-this.height),
@@ -148,83 +148,92 @@ export default class Entity extends PIXI.Sprite {
             this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
             this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y
         ];
+        this.currentCell = PlainsOfShinar.getCellFromLocation(this.position.x, this.position.y);
 
         this.body.position.set(this.position.x, this.position.y);
+
         this.shadow.position.set(this.body.position.x, this.body.position.y);
 
         this.shadow.currentFrame = this.body.currentFrame;
     }
 
-    moveTo = (x, y) => {
+    moveTo = (x, y, pathfind) => {
 
         // Only continue if the target position is new
         if (this.targetPositionX != x || this.targetPositionY != y) {
 
-            /** Check whether or not the entity can get to the target location without pathfinding;
-             * i.e. if there are no other static entities in the way.
-             * 
-             * Draws angle-dependent lines from the entity to its target location,
-             * and checks if those lines are colliding with any other (static) entities.
-             * @author  Andrew Rogers
-             * @returns {boolean} Whether or not pathfinding is needed.
-             */
-            const isPathfindingNeeded = () => {
+            // If we want to pathfind...
+            if (pathfind) {
 
-                /** The angle between the current position and the target position, in degrees */
-                const angle = PlainsOfShinar.radiansToDegrees(Math.atan2(y - this.position.y, x - this.position.x));
-                let linesToCheck;
+                const isPathfindingNeeded = () => {
 
-                // Check if the target location is to the west, north, east, or south of the entity
-                if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle) ||
-                    (angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle))
+                    /** The angle between the current position and the target position, in degrees */
+                    const angle = PlainsOfShinar.radiansToDegrees(Math.atan2(y - this.position.y, x - this.position.x));
+                    let linesToCheck;
 
-                    // Two lines from the left and right corners of the entity,
-                    // to the potential position of those corners at the target location
-                    linesToCheck = [[this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
-                    x - PlainsOfShinar.isometrify(this.width), y],
+                    // Check if the target location is to the west, north, east, or south of the entity
+                    if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle) ||
+                        (angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle))
 
-                    [this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
-                    x + PlainsOfShinar.isometrify(this.width), y]];
+                        // Two lines from the left and right corners of the entity,
+                        // to the potential position of those corners at the target location
+                        linesToCheck = [[this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
+                        x - PlainsOfShinar.isometrify(this.width), y],
 
-                else
+                        [this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
+                        x + PlainsOfShinar.isometrify(this.width), y]];
 
-                    // Two lines from the top and bottom corners of the entity,
-                    // to the potential position of those corners at the target location
-                    linesToCheck = [[this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
-                    x, y - PlainsOfShinar.isometrify(this.height)],
+                    else
 
-                    [this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
-                    x, y + PlainsOfShinar.isometrify(this.height)]];
+                        // Two lines from the top and bottom corners of the entity,
+                        // to the potential position of those corners at the target location
+                        linesToCheck = [[this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
+                            x, y - PlainsOfShinar.isometrify(this.height)],
 
-                for (const line of linesToCheck)
+                        [this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
+                            x, y + PlainsOfShinar.isometrify(this.height)]];
 
-                    // TODO: Again, probably shouldn't loop over all entities
-                    for (const entity of PlainsOfShinar.entities)
+                    for (const line of linesToCheck)
 
-                        if (entity !== this && PlainsOfShinar.collisionCheck(line, entity.collisionBox))
+                        // TODO: Again, probably shouldn't loop over all entities
+                        for (const entity of PlainsOfShinar.entities)
 
-                            return true;
+                            if (entity !== this && PlainsOfShinar.collisionCheck(line, entity.collisionBox))
 
-                return false;
-            }
+                                return true;
 
-            if (isPathfindingNeeded()) {
+                    return false;
+                }
+                // Check if we even need to...
+                if (isPathfindingNeeded()) {
 
-                this.targetCell = PlainsOfShinar.getCellFromLocation(x, y);
+                    this.targetCell = PlainsOfShinar.getCellFromLocation(x, y);
 
-                // I think the timing here is broken since it doesn't return the message instantly
+                    // I think the timing here is broken since it doesn't return the message instantly
 
-                // Find a path to the target cell in a web worker
-                Entity.worker.postMessage({
+                    // console.log(PlainsOfShinar.grid, this.currentCell, this.targetCell);
 
-                    grid: PlainsOfShinar.grid,
-                    start: this.currentCell,
-                    end: this.targetCell
-                });
+                    // Find a path to the target cell in a web worker
+                    Entity.worker.postMessage({
 
-                Entity.worker.onmessage = (event) => this.path = event.data.path;
+                        grid: PlainsOfShinar.grid,
+                        start: this.currentCell,
+                        end: this.targetCell
+                    });
 
-                console.log(this.label + ' path:', this.path);
+                    Entity.worker.onmessage = (event) => {
+
+                        this.path = event.data.path;
+
+                        this.setNextNode();
+                    }
+                }
+                else {
+
+                    this.targetPositionX = x;
+                    this.targetPositionY = y;
+                }
+
             }
             else {
 
@@ -232,6 +241,13 @@ export default class Entity extends PIXI.Sprite {
                 this.targetPositionY = y;
             }
         }
+    }
+    setNextNode = () => {
+
+        const nextCell = this.path.shift();
+        const { x, y } = PlainsOfShinar.getLocationFromCell(nextCell.x, nextCell.y);
+        this.targetPositionX = x;
+        this.targetPositionY = y;
     }
     calculateFacing = (x1, y1, x2, y2) => {
 
@@ -291,11 +307,21 @@ export default class Entity extends PIXI.Sprite {
                 this.position.x = nextX;
                 this.position.y = nextY;
 
+                // If this entity is now at its target position...
                 if (this.position.x == this.targetPositionX && this.position.y == this.targetPositionY)
 
-                    this.isMoving = false;
+                    // Set the next path node (if there is one) as the target position
+                    if (this.path?.length) this.setNextNode();
+
+                    // Otherwise, we're done moving
+                    else this.isMoving = false;
+
                 else this.isMoving = true;
             }
+        }
+        // If the entity is at the target position, but there's still more path nodes...
+        else if (this.path) {
+
         }
     }
     handleMovementAnimations = () => {

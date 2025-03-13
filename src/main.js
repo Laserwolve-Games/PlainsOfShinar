@@ -43,9 +43,8 @@ import Player from './player.js';
     background.tileTransform.rotation = PlainsOfShinar.isometry;
     PlainsOfShinar.app.stage.addChild(background);
 
-    const gridSize = PlainsOfShinar.layoutWidth / PlainsOfShinar.cellWidth;
-    console.log('Generating ' + gridSize + 'x' + gridSize + ' grid...');
-    PlainsOfShinar.grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+    PlainsOfShinar.grid = Array.from({ length: PlainsOfShinar.gridSize },
+        () => Array(PlainsOfShinar.gridSize).fill(0));
 
     // Generate a visualization of the grid.
     for (let i = 0; i <= PlainsOfShinar.layoutHeight; i += PlainsOfShinar.cellWidth) {
@@ -74,8 +73,8 @@ import Player from './player.js';
     }
 
     const player = new Player();
-    const barrel = new Entity('tutorial', 'barrel', 'default', 128, 14, 14);
-    const barrel2 = new Entity('tutorial', 'barrel', 'default', 128, 18, 18);
+    const barrel = new Entity('tutorial', 'barrel', 'default', 128, 14, 14, true);
+    const barrel2 = new Entity('tutorial', 'barrel', 'default', 128, 18, 18, true);
 
     let PointerIsDown = false;
     let mouseX = 0;
@@ -96,13 +95,22 @@ import Player from './player.js';
 
         PointerIsDown = true;
 
-        player.moveTo(mouseX, mouseY);
+        player.moveTo(mouseX, mouseY, false);
     });
     PlainsOfShinar.app.canvas.addEventListener('pointerup', (event) => {
 
         updateMousePosition(event);
 
         PointerIsDown = false;
+    });
+
+    PlainsOfShinar.app.canvas.addEventListener('click', (event) => {
+
+        updateMousePosition(event);
+
+        console.log('click');
+
+        player.moveTo(mouseX, mouseY, true);
     });
 
     const updateMousePosition = (event) => {

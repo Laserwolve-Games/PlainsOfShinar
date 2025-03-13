@@ -37,13 +37,12 @@ const horizontalLineRadians = Math.atan2(1, -2); // 2.677945044588987 radians
 // TODO: We should replace all degrees with radians for performance and accuracy
 PlainsOfShinar.verticalLineAngle = PlainsOfShinar.radiansToDegrees(verticalLineRadians); // 26.56505117707799 degrees
 PlainsOfShinar.horizontalLineAngle = PlainsOfShinar.radiansToDegrees(horizontalLineRadians); // 153.43494882292202 degrees
-PlainsOfShinar.verticalLineOppositeAngle = PlainsOfShinar.radiansToDegrees(verticalLineRadians + Math.PI); // 206.56505117707798 degrees
-PlainsOfShinar.horizontalLineOppositeAngle = PlainsOfShinar.radiansToDegrees(horizontalLineRadians + Math.PI); // 333.434948822922 degrees
 
 PlainsOfShinar.cellWidth = 64;
 PlainsOfShinar.cellHeight = PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth);
 PlainsOfShinar.layoutWidth = 4096;
 PlainsOfShinar.layoutHeight = PlainsOfShinar.isometrify(PlainsOfShinar.layoutWidth);
+PlainsOfShinar.gridSize = PlainsOfShinar.layoutHeight / PlainsOfShinar.cellWidth;
 
 PlainsOfShinar.collisionCheck = (poly1, poly2) => {
     const projectPolygon = (axis, polygon) => {
@@ -86,7 +85,6 @@ PlainsOfShinar.isometricToCartesian = (x, y) => {
     const cartY = (2 * y - x) / 2;
     return { cartX, cartY };
 }
-
 PlainsOfShinar.CartesianToIsometric = (cartX, cartY) => {
     const x = cartX - cartY;
     const y = (cartX + cartY) / 2;
@@ -107,10 +105,9 @@ PlainsOfShinar.getCellFromLocation = (x, y) => {
     
     const { cartX, cartY } = PlainsOfShinar.isometricToCartesian(targetX, targetY);
 
-    // Warning: ugly math that I do not understand
-    // Might break if we change cell or layout sizes
-    const gridX = Math.floor(cartX / PlainsOfShinar.cellWidth) - 16;
-    const gridY = Math.round(cartY / PlainsOfShinar.cellWidth) - 16;
+    // Warning: I'm not confident in this math. It might break if we change the global variables.
+    const gridX = Math.floor(cartX / PlainsOfShinar.cellWidth) - PlainsOfShinar.isometrify(PlainsOfShinar.gridSize);
+    const gridY = Math.round(cartY / PlainsOfShinar.cellWidth) - PlainsOfShinar.isometrify(PlainsOfShinar.gridSize);
 
     return { x: gridX, y: Math.abs(gridY) };
     
@@ -123,5 +120,4 @@ PlainsOfShinar.getLocationFromCell = (gridX, gridY) => {
 
     return {x, y};
 }
-
 export default PlainsOfShinar;

@@ -26,9 +26,20 @@ PlainsOfShinar.isometrify = (value, angle) => {
     // and I really should just be dividing by 2.
     else return value * PlainsOfShinar.isometry;
 }
+PlainsOfShinar.radiansToDegrees = (radians) => radians * 180 / Math.PI;
 
 // Isometric angles: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/8
 PlainsOfShinar.isometry = .5;
+
+const verticalLineRadians = Math.atan2(1, 2); // 0.4636476090008061 radians
+const horizontalLineRadians = Math.atan2(1, -2); // 2.677945044588987 radians
+
+// TODO: We should replace all degrees with radians for performance and accuracy
+PlainsOfShinar.verticalLineAngle = PlainsOfShinar.radiansToDegrees(verticalLineRadians); // 26.56505117707799 degrees
+PlainsOfShinar.horizontalLineAngle = PlainsOfShinar.radiansToDegrees(horizontalLineRadians); // 153.43494882292202 degrees
+PlainsOfShinar.verticalLineOppositeAngle = PlainsOfShinar.radiansToDegrees(verticalLineRadians + Math.PI); // 206.56505117707798 degrees
+PlainsOfShinar.horizontalLineOppositeAngle = PlainsOfShinar.radiansToDegrees(horizontalLineRadians + Math.PI); // 333.434948822922 degrees
+
 PlainsOfShinar.cellWidth = 64;
 PlainsOfShinar.cellHeight = PlainsOfShinar.isometrify(PlainsOfShinar.cellWidth);
 PlainsOfShinar.layoutWidth = 4096;

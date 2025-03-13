@@ -108,8 +108,6 @@ import Player from './player.js';
 
         updateMousePosition(event);
 
-        console.log('click');
-
         player.moveTo(mouseX, mouseY, true);
     });
 

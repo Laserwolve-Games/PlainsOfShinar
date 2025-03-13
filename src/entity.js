@@ -25,8 +25,23 @@ export default class Entity extends PIXI.Sprite {
         this.currentCell = { x, y };
         this.set = set;
 
-        if (isStatic) PlainsOfShinar.grid[x][y] = 1;
+        // Set the node of this entity and the 8 surrounding nodes
+        // as intraversable for pathfinding, if this entity is static.
+        // Necessary since our collision logic doesn't like entities
+        // that are very close together.
+        if (isStatic) {
 
+            PlainsOfShinar.grid[x][y] = 1;
+            
+            PlainsOfShinar.grid[x-1][y-1] = 1;
+            PlainsOfShinar.grid[x][y-1] = 1;
+            PlainsOfShinar.grid[x+1][y-1] = 1;
+            PlainsOfShinar.grid[x-1][y] = 1;
+            PlainsOfShinar.grid[x+1][y] = 1;
+            PlainsOfShinar.grid[x-1][y+1] = 1;
+            PlainsOfShinar.grid[x][y+1] = 1;
+            PlainsOfShinar.grid[x+1][y+1] = 1;
+        }
         const isometricDiamond = [
             0, PlainsOfShinar.isometrify(-this.height),
             PlainsOfShinar.isometrify(this.width), 0,

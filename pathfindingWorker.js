@@ -82,10 +82,30 @@ const getNeighbors = (grid, node) => {
 // Reconstruct the path from end to start
 const reconstructPath = (cameFrom, current) => {
     const path = [current];
-    // Follow the path back to the start
+    const visited = new Set(); // Track visited nodes to prevent infinite loops
+
     while (cameFrom.has(JSON.stringify(current))) {
+
+        if (visited.has(JSON.stringify(current))) break;
+
+        visited.add(JSON.stringify(current));
+
         current = cameFrom.get(JSON.stringify(current));
+
         path.unshift(current);
     }
+
+    // For some reason it wants to path to the immediate next cell,
+    // then return to the origin, before starting the actual path.
+    path.shift();
+    path.shift();
+
+    // Also X and Y values are swapped for some reason, so invert them.
+    for (let i = 0; i < path.length; i++) {
+        const temp = path[i].x;
+        path[i].x = path[i].y;
+        path[i].y = temp;
+    }
+
     return path;
 };

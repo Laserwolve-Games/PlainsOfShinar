@@ -32,15 +32,15 @@ export default class Entity extends PIXI.Sprite {
         if (isStatic) {
 
             PlainsOfShinar.grid[x][y] = 1;
-            
-            PlainsOfShinar.grid[x-1][y-1] = 1;
-            PlainsOfShinar.grid[x][y-1] = 1;
-            PlainsOfShinar.grid[x+1][y-1] = 1;
-            PlainsOfShinar.grid[x-1][y] = 1;
-            PlainsOfShinar.grid[x+1][y] = 1;
-            PlainsOfShinar.grid[x-1][y+1] = 1;
-            PlainsOfShinar.grid[x][y+1] = 1;
-            PlainsOfShinar.grid[x+1][y+1] = 1;
+
+            PlainsOfShinar.grid[x - 1][y - 1] = 1;
+            PlainsOfShinar.grid[x][y - 1] = 1;
+            PlainsOfShinar.grid[x + 1][y - 1] = 1;
+            PlainsOfShinar.grid[x - 1][y] = 1;
+            PlainsOfShinar.grid[x + 1][y] = 1;
+            PlainsOfShinar.grid[x - 1][y + 1] = 1;
+            PlainsOfShinar.grid[x][y + 1] = 1;
+            PlainsOfShinar.grid[x + 1][y + 1] = 1;
         }
         const isometricDiamond = [
             0, PlainsOfShinar.isometrify(-this.height),
@@ -136,7 +136,6 @@ export default class Entity extends PIXI.Sprite {
         this.body = this.animations.find(a => a.label === animation);
 
         this.shadow = this.animations.find(a => a.label === 'shadow_' + animation);
-
         this.setShadow();
 
         this.body.currentFrame = startFrame;
@@ -148,6 +147,7 @@ export default class Entity extends PIXI.Sprite {
         PlainsOfShinar.app.stage.addChild(this.shadow);
     }
     setShadow = () => {
+
         this.shadow.alpha = 0.5;
         this.shadow.filters = [Entity.blurFilter];
     }
@@ -171,7 +171,45 @@ export default class Entity extends PIXI.Sprite {
 
         this.shadow.currentFrame = this.body.currentFrame;
     }
+    isPathfindingNeeded = (x, y) => {
 
+        /** The angle between the current position and the target position, in degrees */
+        const angle = PlainsOfShinar.radiansToDegrees(Math.atan2(y - this.position.y, x - this.position.x));
+        let linesToCheck;
+
+        // Check if the target location is to the west, north, east, or south of the entity
+        if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle) ||
+            (angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle))
+
+            // Two lines from the left and right corners of the entity,
+            // to the potential position of those corners at the target location
+            linesToCheck = [[this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
+            x - PlainsOfShinar.isometrify(this.width), y],
+
+            [this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
+            x + PlainsOfShinar.isometrify(this.width), y]];
+
+        else
+
+            // Two lines from the top and bottom corners of the entity,
+            // to the potential position of those corners at the target location
+            linesToCheck = [[this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
+                x, y - PlainsOfShinar.isometrify(this.height)],
+
+            [this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
+                x, y + PlainsOfShinar.isometrify(this.height)]];
+
+        for (const line of linesToCheck)
+
+            // TODO: Again, probably shouldn't loop over all entities
+            for (const entity of PlainsOfShinar.entities)
+
+                if (entity !== this && PlainsOfShinar.collisionCheck(line, entity.collisionBox))
+
+                    return true;
+
+        return false;
+    }
     moveTo = (x, y, pathfind) => {
 
         // Only continue if the target position is new
@@ -180,53 +218,10 @@ export default class Entity extends PIXI.Sprite {
             // If we want to pathfind...
             if (pathfind) {
 
-                const isPathfindingNeeded = () => {
-
-                    /** The angle between the current position and the target position, in degrees */
-                    const angle = PlainsOfShinar.radiansToDegrees(Math.atan2(y - this.position.y, x - this.position.x));
-                    let linesToCheck;
-
-                    // Check if the target location is to the west, north, east, or south of the entity
-                    if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle) ||
-                        (angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle))
-
-                        // Two lines from the left and right corners of the entity,
-                        // to the potential position of those corners at the target location
-                        linesToCheck = [[this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
-                        x - PlainsOfShinar.isometrify(this.width), y],
-
-                        [this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
-                        x + PlainsOfShinar.isometrify(this.width), y]];
-
-                    else
-
-                        // Two lines from the top and bottom corners of the entity,
-                        // to the potential position of those corners at the target location
-                        linesToCheck = [[this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
-                            x, y - PlainsOfShinar.isometrify(this.height)],
-
-                        [this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
-                            x, y + PlainsOfShinar.isometrify(this.height)]];
-
-                    for (const line of linesToCheck)
-
-                        // TODO: Again, probably shouldn't loop over all entities
-                        for (const entity of PlainsOfShinar.entities)
-
-                            if (entity !== this && PlainsOfShinar.collisionCheck(line, entity.collisionBox))
-
-                                return true;
-
-                    return false;
-                }
                 // Check if we even need to...
-                if (isPathfindingNeeded()) {
+                if (this.isPathfindingNeeded(x, y)) {
 
                     this.targetCell = PlainsOfShinar.getCellFromLocation(x, y);
-
-                    // I think the timing here is broken since it doesn't return the message instantly
-
-                    // console.log(PlainsOfShinar.grid, this.currentCell, this.targetCell);
 
                     // Find a path to the target cell in a web worker
                     Entity.worker.postMessage({
@@ -245,24 +240,47 @@ export default class Entity extends PIXI.Sprite {
                 }
                 else {
 
+                    this.path = [];
+
                     this.targetPositionX = x;
                     this.targetPositionY = y;
                 }
-
             }
             else {
+
+                this.path = [];
 
                 this.targetPositionX = x;
                 this.targetPositionY = y;
             }
         }
     }
-    setNextNode = () => {
+    setNextNode = (takeShortcuts = false) => {
 
-        const nextCell = this.path.shift();
-        const { x, y } = PlainsOfShinar.getLocationFromCell(nextCell.x, nextCell.y);
+        let cell;
+
+        if (takeShortcuts) {
+
+            // currently broken
+            for (const node of this.path) {
+
+                let nodesToRemove = [];
+                console.log(nodesToRemove);
+                const { x, y } = PlainsOfShinar.getLocationFromCell(node.x, node.y);
+
+                // If the entity has line of sight to this cell, mark it for removal
+                if (!this.isPathfindingNeeded(x, y)) nodesToRemove.push(node);
+                // Otherwise, the last cell we added to the removal list
+                // is actually the one to move to
+                else cell = nodesToRemove.pop();
+            }
+        }
+        else cell = this.path.shift();
+
+        const { x, y } = PlainsOfShinar.getLocationFromCell(cell.x, cell.y);
         this.targetPositionX = x;
         this.targetPositionY = y;
+
     }
     calculateFacing = (x1, y1, x2, y2) => {
 

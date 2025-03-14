@@ -171,34 +171,65 @@ export default class Entity extends PIXI.Sprite {
 
         this.shadow.currentFrame = this.body.currentFrame;
     }
-    isPathfindingNeeded = (x, y) => {
+    /** Check if this entity needs pathfinding to reach the target location.
+     * 
+     * This function creates four lines, one from each corner of the entity,
+     * to the location where that corner would be if the entity was at the
+     * target location. Only two lines are needed (i.e. if the target location
+     * is above  the entity, we only need the left and right lines) for a good
+     * approximation. A third line can be added with `fullCheck` to ensure the
+     * entity will entirely fit at the target location.
+     * 
+     * @author Andrew Rogers
+     * @param {*} x The X coordinate of the target location.
+     * @param {*} y The Y coordinate of the target location.
+     * @param {*} fullCheck Whether or not the check the extra line for collisions.
+     * @returns Whether or not this entity needs pathfinding to reach the target location.
+     */
+    isPathfindingNeeded = (x, y, fullCheck = false) => {
 
         /** The angle between the current position and the target position, in degrees */
         const angle = PlainsOfShinar.radiansToDegrees(Math.atan2(y - this.position.y, x - this.position.x));
         let linesToCheck;
+        
+        // Lines that go from the specified corner of the entity,
+        // to the potential location of that corner at the target location
+        const leftLine = [this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
+        x - PlainsOfShinar.isometrify(this.width), y];
+        const rightLine = [this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
+        x + PlainsOfShinar.isometrify(this.width), y]
+        const topLine = [this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
+            x, y - PlainsOfShinar.isometrify(this.height)];
+        const bottomLine = [this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
+            x, y + PlainsOfShinar.isometrify(this.height)];
 
-        // Check if the target location is to the west, north, east, or south of the entity
-        if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle) ||
-            (angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle))
+        // Determine which lines are needed to check for collisions
+        if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle)) {
+            // target location is below the entity
+            linesToCheck = [leftLine, rightLine];
+            
+            if (fullCheck) linesToCheck.push(bottomLine);
+        }
+        if ((angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle)) {
+            // target location is above the entity
+            linesToCheck = [leftLine, rightLine];
 
-            // Two lines from the left and right corners of the entity,
-            // to the potential position of those corners at the target location
-            linesToCheck = [[this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
-            x - PlainsOfShinar.isometrify(this.width), y],
+            if (fullCheck) linesToCheck.push(topLine);
+        }
+        if ((angle >= PlainsOfShinar.horizontalLineAngle || angle <= -PlainsOfShinar.horizontalLineAngle)) {
+            // target location is to the right of the entity
+            linesToCheck = [topLine, bottomLine];
 
-            [this.position.x + PlainsOfShinar.isometrify(this.width), this.position.y,
-            x + PlainsOfShinar.isometrify(this.width), y]];
+            if (fullCheck) linesToCheck.push(rightLine);
+        }
+        if ((angle <= PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.verticalLineAngle)) {
+            // target location is to the left of the entity
+            linesToCheck = [topLine, bottomLine];
 
-        else
+            if (fullCheck) linesToCheck.push(leftLine);
+        }
 
-            // Two lines from the top and bottom corners of the entity,
-            // to the potential position of those corners at the target location
-            linesToCheck = [[this.position.x, this.position.y - PlainsOfShinar.isometrify(this.height),
-                x, y - PlainsOfShinar.isometrify(this.height)],
-
-            [this.position.x, this.position.y + PlainsOfShinar.isometrify(this.height),
-                x, y + PlainsOfShinar.isometrify(this.height)]];
-
+        // Check all the specified lines against entities for collisions
         for (const line of linesToCheck)
 
             // TODO: Again, probably shouldn't loop over all entities
@@ -206,8 +237,10 @@ export default class Entity extends PIXI.Sprite {
 
                 if (entity !== this && PlainsOfShinar.collisionCheck(line, entity.collisionBox))
 
+                    // If any line collides with any entity, pathfinding is needed
                     return true;
 
+        // Otherwise, pathfinding is not needed
         return false;
     }
     moveTo = (x, y, pathfind) => {
@@ -235,7 +268,7 @@ export default class Entity extends PIXI.Sprite {
 
                         this.path = event.data.path;
 
-                        this.setNextNode();
+                        if (this.path?.length) this.setNextNode();
                     }
                 }
                 else {

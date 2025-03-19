@@ -191,7 +191,7 @@ export default class Entity extends PIXI.Sprite {
         /** The angle between the current position and the target position, in degrees */
         const angle = PlainsOfShinar.radiansToDegrees(Math.atan2(y - this.position.y, x - this.position.x));
         let linesToCheck;
-        
+
         // Lines that go from the specified corner of the entity,
         // to the potential location of that corner at the target location
         const leftLine = [this.position.x - PlainsOfShinar.isometrify(this.width), this.position.y,
@@ -207,7 +207,7 @@ export default class Entity extends PIXI.Sprite {
         if ((angle >= PlainsOfShinar.verticalLineAngle && angle <= PlainsOfShinar.horizontalLineAngle)) {
             // target location is below the entity
             linesToCheck = [leftLine, rightLine];
-            
+
             if (fullCheck) linesToCheck.push(bottomLine);
         }
         if ((angle <= -PlainsOfShinar.verticalLineAngle && angle >= -PlainsOfShinar.horizontalLineAngle)) {
@@ -242,6 +242,10 @@ export default class Entity extends PIXI.Sprite {
 
         // Otherwise, pathfinding is not needed
         return false;
+    }
+    hasLineOfSightTo = (x, y) => {
+
+        return !this.isPathfindingNeeded(x, y, true);
     }
     moveTo = (x, y, pathfind) => {
 
@@ -288,29 +292,35 @@ export default class Entity extends PIXI.Sprite {
             }
         }
     }
-    setNextNode = (takeShortcuts = false) => {
+    setNextNode = (takeShortcuts = true) => {
 
         let cell;
 
         if (takeShortcuts) {
 
-            // currently broken
-            for (const node of this.path) {
+            // Start from the end of the path and work backwards
+            for (let i = this.path.length - 1; i >= 0; i--) {
 
-                let nodesToRemove = [];
-                console.log(nodesToRemove);
-                const { x, y } = PlainsOfShinar.getLocationFromCell(node.x, node.y);
+                // If the entity has line of sight to this node...
+                const { x, y } = PlainsOfShinar.getLocationFromCell(this.path[i].x, this.path[i].y);
 
-                // If the entity has line of sight to this cell, mark it for removal
-                if (!this.isPathfindingNeeded(x, y)) nodesToRemove.push(node);
-                // Otherwise, the last cell we added to the removal list
-                // is actually the one to move to
-                else cell = nodesToRemove.pop();
+                if (this.hasLineOfSightTo(x, y)) {
+
+                    // Set cell to this node
+                    cell = this.path[i];
+
+                    // Remove all nodes before this node
+                    this.path.splice(0, i + 1);
+
+                    // Stop the loop
+                    break;
+                }
             }
         }
         else cell = this.path.shift();
 
         const { x, y } = PlainsOfShinar.getLocationFromCell(cell.x, cell.y);
+        
         this.targetPositionX = x;
         this.targetPositionY = y;
 
@@ -384,10 +394,6 @@ export default class Entity extends PIXI.Sprite {
 
                 else this.isMoving = true;
             }
-        }
-        // If the entity is at the target position, but there's still more path nodes...
-        else if (this.path) {
-
         }
     }
     handleMovementAnimations = () => {

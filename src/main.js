@@ -3,7 +3,6 @@ import Entity from './entity.js';
 import Player from './player.js';
 
 // No Intellisense. Bug: https://github.com/Laserwolve-Games/PlainsOfShinar/issues/1
-// import PIXI from 'C:/pixi.js';
 
 (async () => {
 

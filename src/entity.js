@@ -1,5 +1,4 @@
 import PlainsOfShinar from './globals.js';
-// import PIXI from 'C:/pixi.js';
 
 // Can't extend PIXI.Container: https://github.com/Laserwolve-Games/PlainsOfShinar/discussions/3
 // Can't extend PIXI.Graphics because we need this.anchor
@@ -7,7 +6,7 @@ import PlainsOfShinar from './globals.js';
 export default class Entity extends PIXI.Sprite {
 
     // TODO: Turn this into a pool of workers
-    static worker = new Worker('pathfindingWorker.js');
+    static worker = new Worker('src/pathfindingWorker.js');
     static blurFilter = new PIXI.BlurFilter(5);
 
     constructor(set, name, animation, size, x, y, isStatic, initialFacing = 0) {

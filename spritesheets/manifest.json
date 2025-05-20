@@ -1,0 +1,100 @@
+{
+  "man_upwardSlash_shadow": [
+    "./man_upwardSlash_shadow/man_upwardSlash_shadow-0.json",
+    "./man_upwardSlash_shadow/man_upwardSlash_shadow-1.json",
+    "./man_upwardSlash_shadow/man_upwardSlash_shadow-2.json"
+  ],
+  "man_downwardSlash_shadow": [
+    "./man_downwardSlash_shadow/man_downwardSlash_shadow-0.json",
+    "./man_downwardSlash_shadow/man_downwardSlash_shadow-1.json"
+  ],
+  "man_idle_shadow": [
+    "./man_idle_shadow/man_idle_shadow-0.json",
+    "./man_idle_shadow/man_idle_shadow-1.json",
+    "./man_idle_shadow/man_idle_shadow-2.json",
+    "./man_idle_shadow/man_idle_shadow-3.json"
+  ],
+  "man_idle_model": [
+    "./man_idle_model/man_idle_model-0.json",
+    "./man_idle_model/man_idle_model-1.json",
+    "./man_idle_model/man_idle_model-2.json",
+    "./man_idle_model/man_idle_model-3.json"
+  ],
+  "man_downwardSlash_model": [
+    "./man_downwardSlash_model/man_downwardSlash_model-0.json",
+    "./man_downwardSlash_model/man_downwardSlash_model-1.json",
+    "./man_downwardSlash_model/man_downwardSlash_model-2.json"
+  ],
+  "man_walk_model": [
+    "./man_walk_model/man_walk_model-0.json",
+    "./man_walk_model/man_walk_model-1.json"
+  ],
+  "man_groundSlam_model": [
+    "./man_groundSlam_model/man_groundSlam_model-0.json",
+    "./man_groundSlam_model/man_groundSlam_model-1.json",
+    "./man_groundSlam_model/man_groundSlam_model-2.json",
+    "./man_groundSlam_model/man_groundSlam_model-3.json",
+    "./man_groundSlam_model/man_groundSlam_model-4.json"
+  ],
+  "man_die_shadow": [
+    "./man_die_shadow/man_die_shadow-0.json",
+    "./man_die_shadow/man_die_shadow-1.json",
+    "./man_die_shadow/man_die_shadow-2.json"
+  ],
+  "man_hit_model": [
+    "./man_hit_model/man_hit_model-0.json",
+    "./man_hit_model/man_hit_model-1.json"
+  ],
+  "man_warCry_model": [
+    "./man_warCry_model/man_warCry_model-0.json",
+    "./man_warCry_model/man_warCry_model-1.json",
+    "./man_warCry_model/man_warCry_model-2.json",
+    "./man_warCry_model/man_warCry_model-3.json"
+  ],
+  "man_groundSlam_shadow": [
+    "./man_groundSlam_shadow/man_groundSlam_shadow-0.json",
+    "./man_groundSlam_shadow/man_groundSlam_shadow-1.json",
+    "./man_groundSlam_shadow/man_groundSlam_shadow-2.json",
+    "./man_groundSlam_shadow/man_groundSlam_shadow-3.json"
+  ],
+  "man_upwardSlash_model": [
+    "./man_upwardSlash_model/man_upwardSlash_model-0.json",
+    "./man_upwardSlash_model/man_upwardSlash_model-1.json",
+    "./man_upwardSlash_model/man_upwardSlash_model-2.json"
+  ],
+  "man_warCry_shadow": [
+    "./man_warCry_shadow/man_warCry_shadow-0.json",
+    "./man_warCry_shadow/man_warCry_shadow-1.json",
+    "./man_warCry_shadow/man_warCry_shadow-2.json",
+    "./man_warCry_shadow/man_warCry_shadow-3.json"
+  ],
+  "man_die_model": [
+    "./man_die_model/man_die_model-0.json",
+    "./man_die_model/man_die_model-1.json",
+    "./man_die_model/man_die_model-2.json",
+    "./man_die_model/man_die_model-3.json"
+  ],
+  "man_kick_shadow": [
+    "./man_kick_shadow/man_kick_shadow-0.json",
+    "./man_kick_shadow/man_kick_shadow-1.json"
+  ],
+  "man_walk_shadow": [
+    "./man_walk_shadow/man_walk_shadow-0.json",
+    "./man_walk_shadow/man_walk_shadow-1.json"
+  ],
+  "man_kick_model": [
+    "./man_kick_model/man_kick_model-0.json",
+    "./man_kick_model/man_kick_model-1.json"
+  ],
+  "man_hit_shadow": [
+    "./man_hit_shadow/man_hit_shadow-0.json",
+    "./man_hit_shadow/man_hit_shadow-1.json"
+  ],
+  "man_block_model": [
+    "./man_block_model/man_block_model-0.json",
+    "./man_block_model/man_block_model-1.json"
+  ],
+  "man_block_shadow": [
+    "./man_block_shadow/man_block_shadow-0.json"
+  ]
+}

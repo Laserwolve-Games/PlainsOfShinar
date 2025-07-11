@@ -1,6 +1,6 @@
 ![Plains of Shinar Logo](images/logo.webp)
 
-A 2D Action RPG (ARPG) made with [Pixi.js](https://pixijs.com/). A port of [DaggerQuest](https://github.com/Laserwolve-Games/DaggerQuest)
+A 2D Action RPG (ARPG) made with [Pixi.js](https://pixijs.com/). A port of [DaggerQuest](https://DaggerQuest.com).
 
 ## 🎮 Features
 
@@ -104,12 +104,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## 📝 License
 
 This project is licensed under the [AGPL 3.0 License](https://www.gnu.org/licenses/agpl-3.0.html.en) - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Links
-
-- **Original Game**: [DaggerQuest](https://github.com/Laserwolve-Games/DaggerQuest)
-- **Game Engine**: [Pixi.js](https://pixijs.com/)
-- **Developer**: [Laserwolve Games](https://github.com/Laserwolve-Games)
 
 ## 🎖️ Acknowledgments
 

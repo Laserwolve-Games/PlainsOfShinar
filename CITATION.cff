@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Plains of Shinar"
+abstract: "A 2D Action RPG (ARPG) made with Pixi.js, featuring isometric graphics, character animation system, and modular architecture. A port of DaggerQuest."
+authors:
+  - family-names: "Laserwolve Games"
+    email: "contact@laserwolvegames.com"
+repository-code: "https://github.com/Laserwolve-Games/PlainsOfShinar"
+url: "https://plainsofshinar.com"
+license: AGPL-3.0
+keywords:
+  - "game"
+  - "html5"
+  - "pixijs"
+  - "arpg"
+  - "action-rpg"
+  - "isometric"
+  - "2d-game"
+  - "browser-game"
+  - "webgpu"
+version: "1.0.0"
+date-released: "2025-08-20"
+preferred-citation:
+  type: software
+  title: "Plains of Shinar: A 2D Action RPG"
+  authors:
+    - family-names: "Laserwolve Games"
+      email: "contact@laserwolvegames.com"
+  repository-code: "https://github.com/Laserwolve-Games/PlainsOfShinar"
+  url: "https://plainsofshinar.com"
+  version: "1.0.0"
+  date-released: "2025-08-20"
+  license: AGPL-3.0

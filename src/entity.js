@@ -62,30 +62,60 @@ export default class Entity extends PIXI.Sprite {
         PlainsOfShinar.app.stage.addChild(this);
 
         // The paths to all files for this set
-        const jsonPaths = PlainsOfShinar.manifest[this.set];
+        const modelKey = `${this.label}_${animation}_model`;
+        const shadowKey = `${this.label}_${animation}_shadow`;
+        const rawModelPaths = PlainsOfShinar.manifest[modelKey] || [];
+        const rawShadowPaths = PlainsOfShinar.manifest[shadowKey] || [];
+        
+        // Convert relative paths to full paths from spritesheets directory
+        const jsonPaths = [
+            ...rawModelPaths.map(path => path.startsWith('./') ? 'spritesheets/' + path.substring(2) : path),
+            ...rawShadowPaths.map(path => path.startsWith('./') ? 'spritesheets/' + path.substring(2) : path)
+        ];
 
         (async () => {
 
-            for (const animation of jsonPaths) await PlainsOfShinar.loadAsset(animation);
+            // Only try to load assets if there are paths in the manifest
+            if (jsonPaths.length > 0) {
+                for (const animationPath of jsonPaths) await PlainsOfShinar.loadAsset(animationPath);
+            }
 
-            // For animated entities, the first JSON file is animation data
-            const animationData = PIXI.Assets.cache.get(jsonPaths[0])?.data.animations;
+            // For animated entities, load both model and shadow animation data
+            const modelAnimationData = rawModelPaths.length > 0 ? PIXI.Assets.cache.get(rawModelPaths[0].startsWith('./') ? 'spritesheets/' + rawModelPaths[0].substring(2) : rawModelPaths[0])?.data.animations : null;
+            const shadowAnimationData = rawShadowPaths.length > 0 ? PIXI.Assets.cache.get(rawShadowPaths[0].startsWith('./') ? 'spritesheets/' + rawShadowPaths[0].substring(2) : rawShadowPaths[0])?.data.animations : null;
 
-            // If there was animation data in that first JSON file, this entity is animated
-            if (animationData) {
+            // If there was animation data in the first JSON file, this entity is animated
+            if (modelAnimationData) {
 
-                for (let i = 0; i < Object.keys(animationData).length; i++) {
+                // Load model animations
+                for (let i = 0; i < Object.keys(modelAnimationData).length; i++) {
 
                     // fromFrames pulls from the Pixi cache
-                    const animation = PIXI.AnimatedSprite.fromFrames(animationData[Object.keys(animationData)[i]]);
+                    const animSprite = PIXI.AnimatedSprite.fromFrames(modelAnimationData[Object.keys(modelAnimationData)[i]]);
 
-                    animation.label = Object.keys(animationData)[i];
-                    animation.updateAnchor = true;
-                    animation.interactive = false;
+                    animSprite.label = Object.keys(modelAnimationData)[i];
+                    animSprite.updateAnchor = true;
+                    animSprite.interactive = false;
 
-                    this.animations.push(animation);
+                    this.animations.push(animSprite);
                 }
-                this.setAnimation(animation);
+
+                // Load shadow animations if they exist
+                if (shadowAnimationData) {
+                    for (let i = 0; i < Object.keys(shadowAnimationData).length; i++) {
+
+                        // fromFrames pulls from the Pixi cache
+                        const shadowSprite = PIXI.AnimatedSprite.fromFrames(shadowAnimationData[Object.keys(shadowAnimationData)[i]]);
+
+                        shadowSprite.label = 'shadow_' + Object.keys(shadowAnimationData)[i];
+                        shadowSprite.updateAnchor = true;
+                        shadowSprite.interactive = false;
+
+                        this.animations.push(shadowSprite);
+                    }
+                }
+
+                this.setAnimation(this.facing.toString());
             }
             else {
 
@@ -129,21 +159,51 @@ export default class Entity extends PIXI.Sprite {
             this.body.stop();
 
             PlainsOfShinar.app.stage.removeChild(this.body);
-            PlainsOfShinar.app.stage.removeChild(this.shadow);
+            if (this.shadow) {
+                PlainsOfShinar.app.stage.removeChild(this.shadow);
+            }
         }
         // set body to the specified animation     
         this.body = this.animations.find(a => a.label === animation);
 
+        // If no body found, try with facing direction
+        if (!this.body) {
+            const facingAnimation = this.facing.toString();
+            this.body = this.animations.find(a => a.label === facingAnimation);
+        }
+
+        // If still no body found, use the first available animation
+        if (!this.body && this.animations.length > 0) {
+            this.body = this.animations[0];
+            console.warn(`Animation '${animation}' not found for ${this.label}. Available animations:`, this.animations.map(a => a.label));
+        }
+
         this.shadow = this.animations.find(a => a.label === 'shadow_' + animation);
-        this.setShadow();
+        
+        // Try shadow with facing direction if not found
+        if (!this.shadow) {
+            const facingShadow = 'shadow_' + this.facing.toString();
+            this.shadow = this.animations.find(a => a.label === facingShadow);
+        }
+        
+        // Only set shadow properties if shadow exists
+        if (this.shadow) {
+            this.setShadow();
+        }
 
-        this.body.currentFrame = startFrame;
-        this.body.animationSpeed = .5;
+        if (this.body) {
+            this.body.currentFrame = startFrame;
+            this.body.animationSpeed = .5;
 
-        this.body.play();
+            this.body.play();
 
-        PlainsOfShinar.app.stage.addChild(this.body);
-        PlainsOfShinar.app.stage.addChild(this.shadow);
+            PlainsOfShinar.app.stage.addChild(this.body);
+        } else {
+            console.error(`No animation found for ${this.label} with animation '${animation}'`);
+        }
+        if (this.shadow) {
+            PlainsOfShinar.app.stage.addChild(this.shadow);
+        }
     }
     setShadow = () => {
 

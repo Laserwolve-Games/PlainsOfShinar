@@ -10,7 +10,14 @@ class Game {
         this.moveSpeed = 2;
         this.animations = {};
         this.currentAnimation = 'idle';
+        this.currentDirection = '0'; // Current facing direction as string
         this.facingDirection = 0; // 0 degrees facing right
+        
+        // Available directions in the spritesheets (16 directions)
+        this.directions = [
+            '0', '22.5', '45', '67.5', '90', '112.5', '135', '157.5',
+            '180', '-157.5', '-135', '-112.5', '-90', '-67.5', '-45', '-22.5'
+        ];
         
         this.init().catch(error => {
             console.error('Game initialization failed:', error);
@@ -76,7 +83,7 @@ class Game {
         try {
             console.log('Loading character animations...');
             
-            // Load the sprite sheet JSON files - this automatically loads the associated PNG files
+            // First try to load just the basic files we know work
             await PIXI.Assets.load([
                 './spritesheets/man_walk_model/man_walk_model-0.json',
                 './spritesheets/man_idle_model/man_idle_model-0.json'
@@ -86,42 +93,40 @@ class Game {
             const walkSheet = PIXI.Assets.cache.get('./spritesheets/man_walk_model/man_walk_model-0.json');
             const idleSheet = PIXI.Assets.cache.get('./spritesheets/man_idle_model/man_idle_model-0.json');
             
-            console.log('Walk sheet animations:', Object.keys(walkSheet.data.animations || {}));
-            console.log('Idle sheet animations:', Object.keys(idleSheet.data.animations || {}));
+            console.log('Walk sheet loaded:', !!walkSheet);
+            console.log('Idle sheet loaded:', !!idleSheet);
             
-            // Store the animations - looking for the "0" angle animations
-            this.animations = {};
-            
-            if (walkSheet.data.animations && walkSheet.data.animations["0"]) {
-                this.animations.walk = walkSheet.data.animations["0"];
-                console.log('Walk animation loaded with', this.animations.walk.length, 'frames');
+            if (walkSheet && walkSheet.data && walkSheet.data.animations) {
+                console.log('Walk sheet animations:', Object.keys(walkSheet.data.animations));
+            }
+            if (idleSheet && idleSheet.data && idleSheet.data.animations) {
+                console.log('Idle sheet animations:', Object.keys(idleSheet.data.animations));
             }
             
-            if (idleSheet.data.animations && idleSheet.data.animations["0"]) {
-                this.animations.idle = idleSheet.data.animations["0"];
-                console.log('Idle animation loaded with', this.animations.idle.length, 'frames');
+            // Initialize animations structure
+            this.animations = {
+                walk: {},
+                idle: {}
+            };
+            
+            // Store the directional animations
+            if (walkSheet && walkSheet.data && walkSheet.data.animations) {
+                this.animations.walk = walkSheet.data.animations;
             }
             
-            // If no "0" angle, try to find any available animation
-            if (!this.animations.walk && walkSheet.data.animations) {
-                const firstWalkAnim = Object.keys(walkSheet.data.animations)[0];
-                if (firstWalkAnim) {
-                    this.animations.walk = walkSheet.data.animations[firstWalkAnim];
-                    console.log('Using first available walk animation:', firstWalkAnim);
-                }
+            if (idleSheet && idleSheet.data && idleSheet.data.animations) {
+                this.animations.idle = idleSheet.data.animations;
             }
             
-            if (!this.animations.idle && idleSheet.data.animations) {
-                const firstIdleAnim = Object.keys(idleSheet.data.animations)[0];
-                if (firstIdleAnim) {
-                    this.animations.idle = idleSheet.data.animations[firstIdleAnim];
-                    console.log('Using first available idle animation:', firstIdleAnim);
-                }
-            }
+            console.log('Final walk directions loaded:', Object.keys(this.animations.walk));
+            console.log('Final idle directions loaded:', Object.keys(this.animations.idle));
             
         } catch (error) {
             console.error('Error loading animations:', error);
-            this.createFallbackCharacter();
+            this.animations = {
+                walk: {},
+                idle: {}
+            };
         }
     }
 
@@ -141,11 +146,15 @@ class Game {
     }
 
     createCharacter() {
-        if (this.animations.idle && this.animations.idle.length > 0) {
-            console.log('Creating animated character with', this.animations.idle.length, 'idle frames');
+        console.log('Creating character...');
+        console.log('Available animations:', this.animations);
+        
+        if (this.animations.idle && this.animations.idle['0']) {
+            console.log('Creating animated character with idle animations');
+            console.log('Idle frames for direction 0:', this.animations.idle['0'].length);
             
-            // Create animated sprite using the proper PIXI.js API
-            this.character = PIXI.AnimatedSprite.fromFrames(this.animations.idle);
+            // Create animated sprite using the default direction (0 degrees)
+            this.character = PIXI.AnimatedSprite.fromFrames(this.animations.idle['0']);
             this.character.anchor.set(0.5, 1);
             this.character.animationSpeed = 1/6; // 6 fps as recommended in documentation
             this.character.play();
@@ -159,11 +168,12 @@ class Game {
             
             this.app.stage.addChild(this.character);
             
-        } else if (this.animations.walk && this.animations.walk.length > 0) {
-            console.log('No idle animation, using walk animation with', this.animations.walk.length, 'frames');
+        } else if (this.animations.walk && this.animations.walk['0']) {
+            console.log('No idle animation, using walk animation');
+            console.log('Walk frames for direction 0:', this.animations.walk['0'].length);
             
             // Use walk animation if idle is not available
-            this.character = PIXI.AnimatedSprite.fromFrames(this.animations.walk);
+            this.character = PIXI.AnimatedSprite.fromFrames(this.animations.walk['0']);
             this.character.anchor.set(0.5, 1);
             this.character.animationSpeed = 1/6; // 6 fps
             this.character.play();
@@ -179,6 +189,8 @@ class Game {
             
         } else {
             console.log('No animations available, creating fallback character');
+            console.log('Idle animations available:', Object.keys(this.animations.idle || {}));
+            console.log('Walk animations available:', Object.keys(this.animations.walk || {}));
             this.createFallbackCharacter();
         }
     }
@@ -195,6 +207,38 @@ class Game {
         });
     }
 
+    // Convert radians to degrees
+    radiansToDegrees(radians) {
+        return radians * (180 / Math.PI);
+    }
+
+    // Find the closest direction from the available directions
+    getClosestDirection(angleInDegrees) {
+        // Normalize angle to -180 to 180 range
+        while (angleInDegrees > 180) angleInDegrees -= 360;
+        while (angleInDegrees < -180) angleInDegrees += 360;
+
+        let closestDirection = '0';
+        let smallestDifference = Infinity;
+
+        for (const direction of this.directions) {
+            const directionAngle = parseFloat(direction);
+            let difference = Math.abs(angleInDegrees - directionAngle);
+            
+            // Handle the wrap-around case (e.g., difference between 180 and -180)
+            if (difference > 180) {
+                difference = 360 - difference;
+            }
+
+            if (difference < smallestDifference) {
+                smallestDifference = difference;
+                closestDirection = direction;
+            }
+        }
+
+        return closestDirection;
+    }
+
     moveCharacterTo(x, y) {
         this.targetX = x;
         this.targetY = y;
@@ -205,26 +249,39 @@ class Game {
         const deltaY = y - this.character.y;
         this.facingDirection = Math.atan2(deltaY, deltaX);
         
-        // Flip character if moving left
-        if (deltaX < 0) {
-            this.character.scale.x = -Math.abs(this.character.scale.x);
-        } else {
-            this.character.scale.x = Math.abs(this.character.scale.x);
-        }
+        // Convert to degrees and find closest sprite direction
+        const angleInDegrees = this.radiansToDegrees(this.facingDirection);
+        this.currentDirection = this.getClosestDirection(angleInDegrees);
         
-        // Switch to walk animation
-        this.setAnimation('walk');
+        console.log(`Moving to angle: ${angleInDegrees.toFixed(1)}°, using direction: ${this.currentDirection}`);
+        
+        // Switch to walk animation with the correct direction
+        this.setAnimation('walk', this.currentDirection);
     }
 
-    setAnimation(animationName) {
-        if (this.currentAnimation === animationName) return;
-        if (!this.animations[animationName]) return;
+    setAnimation(animationName, direction = null) {
+        // Use current direction if none specified
+        if (!direction) {
+            direction = this.currentDirection;
+        }
+        
+        // Check if we're already using this animation and direction
+        if (this.currentAnimation === animationName && this.currentDirection === direction) {
+            return;
+        }
+        
+        // Check if the animation and direction exist
+        if (!this.animations[animationName] || !this.animations[animationName][direction]) {
+            console.warn(`Animation ${animationName} direction ${direction} not found`);
+            return;
+        }
         
         this.currentAnimation = animationName;
+        this.currentDirection = direction;
         
         if (this.character && this.character instanceof PIXI.AnimatedSprite) {
             // Create a new AnimatedSprite with the new animation frames
-            const newAnimation = PIXI.AnimatedSprite.fromFrames(this.animations[animationName]);
+            const newAnimation = PIXI.AnimatedSprite.fromFrames(this.animations[animationName][direction]);
             
             // Copy properties from the old character
             newAnimation.anchor.copyFrom(this.character.anchor);
@@ -253,7 +310,7 @@ class Game {
                 this.character.x = this.targetX;
                 this.character.y = this.targetY;
                 this.isMoving = false;
-                this.setAnimation('idle');
+                this.setAnimation('idle', this.currentDirection);
             } else {
                 // Move towards target
                 const moveX = (deltaX / distance) * this.moveSpeed;

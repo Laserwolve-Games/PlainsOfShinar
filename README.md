@@ -1,21 +1,23 @@
 ![Plains of Shinar Logo](images/logo.webp)
 
-A 2D Action RPG (ARPG) made with [Pixi.js](https://pixijs.com/). A port of [DaggerQuest](https://DaggerQuest.com).
+A 2D Action RPG (ARPG) made with [MonoGame](https://www.monogame.net/). A port of [DaggerQuest](https://DaggerQuest.com).
 
 ## 🎮 Features
 
+- **Cross-Platform**: Runs on Windows, Mac, Linux, and more platforms supported by MonoGame
 - **Isometric 2D Graphics**: Beautiful isometric perspective with dynamic camera angles
 - **Character Animation System**: Comprehensive sprite-based animations for player actions
 - **Entity Management**: Modular entity system with collision detection and pathfinding
-- **Web-Based**: Runs directly in modern web browsers with WebGPU support
-- **Modular Architecture**: Clean separation of concerns with ES6 modules
+- **High Performance**: Native performance with hardware-accelerated graphics
+- **Content Pipeline**: Optimized asset management using MonoGame Content Pipeline
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- A modern web browser with WebGPU support (Chrome, Firefox, Safari, Edge)
-- A local web server (for development)
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later
+- [MonoGame](https://www.monogame.net/) (automatically installed via NuGet)
+- Visual Studio 2022, Visual Studio Code, or any .NET-compatible IDE
 
 ### Installation
 
@@ -25,49 +27,57 @@ git clone https://github.com/Laserwolve-Games/PlainsOfShinar.git
 cd PlainsOfShinar
 ```
 
-2. Start a local web server:
+2. Restore dependencies and build the project:
 ```bash
-# Using Python 3
-python -m http.server 8000
-
-# Using Python 2
-python -m SimpleHTTPServer 8000
-
-# Using Node.js (if you have serve installed)
-npx serve .
-
-# Using PHP
-php -S localhost:8000
+dotnet restore
+dotnet build
 ```
 
-3. Open your browser and navigate to `http://localhost:8000`
+3. Run the game:
+```bash
+dotnet run
+```
 
 ## 🎯 Gameplay
 
 Plains of Shinar features classic ARPG gameplay elements:
 
-- **Movement**: Navigate through the isometric world
+- **Movement**: Navigate through the isometric world using keyboard or gamepad
 - **Combat**: Multiple attack animations including slashes, kicks, and ground slams
 - **Character States**: Idle, walking, blocking, and various combat animations
 - **Dynamic Shadows**: Real-time shadow rendering for immersive gameplay
+- **Inventory System**: Collect and manage weapons, armor, and items
+- **Skills & Abilities**: Character progression and customization
 
 ## 🏗️ Architecture
 
 ### Core Components
 
-- **`main.js`**: Entry point and game initialization
-- **`globals.js`**: Global game state, utilities, and configuration
-- **`entity.js`**: Base entity class with animation and collision systems
-- **`player.js`**: Player-specific logic and controls
-- **`pathfindingWorker.js`**: Web Worker for pathfinding calculations
+- **`Game1.cs`**: Main game class inheriting from MonoGame's Game class
+- **`Program.cs`**: Entry point for the application
+- **Content Pipeline**: Asset management through MonoGame's content pipeline
+- **Entity System**: Component-based entity management
+- **Rendering System**: Sprite-based rendering with isometric projection
+
+### Project Structure
+
+```
+PlainsOfShinar/
+├── Game1.cs              # Main game class
+├── Program.cs             # Application entry point
+├── PlainsOfShinar.csproj  # Project file
+├── Content/               # Game assets (textures, sounds, etc.)
+├── bin/                   # Compiled binaries
+└── obj/                   # Build artifacts
+```
 
 ### Key Features
 
-- **Isometric Projection**: Custom isometric transformation system
-- **Grid-Based Movement**: 64x64 cell grid system for positioning
-- **Collision Detection**: SAT (Separating Axis Theorem) collision detection
-- **Animation System**: Sprite sheet-based animation with multiple states
-- **Asset Management**: Efficient loading and caching of game assets
+- **MonoGame Framework**: Built on the robust MonoGame framework
+- **Cross-Platform**: Supports Windows, macOS, Linux, and more
+- **Content Pipeline**: Optimized asset loading and management
+- **Hardware Acceleration**: Leverages GPU for optimal performance
+- **Component Architecture**: Modular, maintainable code structure
 
 ## 🎨 Assets
 
@@ -79,16 +89,36 @@ The game includes comprehensive sprite sheets for character animations:
 - **Reactions**: Hit reactions, blocking, death animations
 - **Special**: War cry and other special animations
 
-Each animation includes both the character model and corresponding shadow sprites.
+Assets are processed through MonoGame's Content Pipeline for optimal performance and cross-platform compatibility.
 
-## 🔧 Configuration
+## 🔧 Development
 
-Key configuration values in `globals.js`:
+### Building the Project
 
-- **Layout**: 4096x2048 isometric layout
-- **Cell Size**: 64x32 pixel cells
-- **Isometry Factor**: 0.5 for proper isometric projection
-- **Grid Size**: Dynamic based on layout dimensions
+```bash
+# Build the project
+dotnet build
+
+# Run the project
+dotnet run
+
+# Publish for distribution
+dotnet publish -c Release
+```
+
+### Available Tasks
+
+The project includes several predefined tasks:
+- **Build**: Compile the project (`dotnet build`)
+- **Publish**: Create distribution packages (`dotnet publish`)
+- **Watch**: Run with hot reload for development (`dotnet watch run`)
+
+### Configuration
+
+Key configuration is managed through:
+- **`PlainsOfShinar.csproj`**: Project settings and dependencies
+- **`Content/Content.mgcb`**: Content pipeline configuration
+- **`app.manifest`**: Application manifest for Windows
 
 ## 🤝 Contributing
 
@@ -96,10 +126,18 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ### Development Guidelines
 
-1. Follow the existing code style and structure
-2. Test your changes thoroughly
-3. Update documentation as needed
-4. Ensure compatibility with modern browsers
+1. Follow C# coding conventions and best practices
+2. Use the existing project structure and architecture
+3. Test your changes thoroughly across different platforms
+4. Update documentation as needed
+5. Ensure compatibility with MonoGame framework standards
+
+### Setting Up Development Environment
+
+1. Install [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+2. Clone the repository
+3. Run `dotnet restore` to install dependencies
+4. Open in your preferred IDE (Visual Studio, VS Code, JetBrains Rider)
 
 ## 📝 License
 
@@ -107,6 +145,7 @@ This project is licensed under the [AGPL 3.0 License](https://www.gnu.org/licens
 
 ## 🎖️ Acknowledgments
 
-- Built with [Pixi.js](https://pixijs.com/)
+- Built with [MonoGame](https://www.monogame.net/)
 - Inspired by classic isometric ARPGs
 - Part of the [Laserwolve Games](https://www.laserwolvegames.com/) portfolio
+- Special thanks to the MonoGame community
